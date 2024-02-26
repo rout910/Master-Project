@@ -1,3 +1,6 @@
+using Npgsql;
+using WEBAPI.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +9,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IEmpRepository, EmpRepository>();
+builder.Services.AddSingleton<NpgsqlConnection>((serviceProvider) =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    return new NpgsqlConnection(connectionString);
+});
 
 var app = builder.Build();
 
