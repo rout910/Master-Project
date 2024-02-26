@@ -8,7 +8,7 @@ using Npgsql;
 
 namespace MVC.Repositories
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
           private readonly NpgsqlConnection _conn;
         private readonly IHttpContextAccessor _httpContextAccessor;
