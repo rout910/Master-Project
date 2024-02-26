@@ -10,6 +10,6 @@ namespace MVC.Repositories
     {
         public void Register(tbluser user);
         public bool IsUser(string email);
-        public bool Login(tbluser user); 
+        public  bool Login(tbluser user); 
     }
 }

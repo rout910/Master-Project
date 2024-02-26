@@ -24,7 +24,7 @@ namespace MVC.Repositories
             try
             {
                 _conn.Open();
-                using (var command = new NpgsqlCommand("INSERT INTO t_muser(c_username, c_emailid, c_password,c_userrole) VALUES (@username, @email, @password,'User')", _conn))
+                using (var command = new NpgsqlCommand("INSERT INTO t_muser(c_username, c_emailid, c_password,c_userrole) VALUES (@username, @email, @password,'Admin')", _conn))
                 {
                     command.CommandType = CommandType.Text;
                     command.Parameters.AddWithValue("@username", user.c_username);
@@ -88,7 +88,7 @@ namespace MVC.Repositories
                 // var emailid = reader["c_emailid"].ToString();
                 // var username=reader["c_username"].ToString();
                 var session = _httpContextAccessor.HttpContext.Session;
-                session.SetString("role",role);
+                session.SetString("c_userrole",role);
                 // session.SetString("emailid",emailid);
                 // session.SetString("username",username);
                 return true;
