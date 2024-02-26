@@ -1,12 +1,112 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using MVC.Models;
+using Npgsql;
 
 namespace MVC.Repositories
 {
-    public class EmpRepository
+    public class EmpRepository : IEmpRepository
     {
-        
+        private readonly NpgsqlConnection _conn;
+
+        public EmpRepository(NpgsqlConnection connection)
+        {
+            _conn = connection;
+        }
+
+        public List<tblemp> GetAll()
+        {
+            List<tblemp> students = new List<tblemp>();
+
+            try
+            {
+                _conn.Open();
+                using var command = new NpgsqlCommand("SELECT * FROM t_mcrud", _conn);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    tblemp student = new tblemp
+                    {
+                        c_empid = Convert.ToInt32(reader["c_empid"]),
+                        c_empname = reader["c_empname"].ToString(),
+                        c_gender = reader["c_gender"].ToString(),
+                        c_shift = reader["c_shift"].ToString(),
+                        c_deptid = Convert.ToInt32(reader["c_deptid"]),
+                        c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
+                        c_empimage = reader["c_empimage"].ToString()
+                    };
+
+                    students.Add(student);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                _conn.Close();
+            }
+
+            return students;
+
+
+        }
+
+        public void Insert(tblemp stud)
+        {
+               _conn.Open();
+            using var command = new NpgsqlCommand("INSERT INTO t_mcrud(c_empname, c_gender, c_shift, c_deptid, c_dob, c_empimage) VALUES (@empname, @gender, @shift, @depid, @dob, @image)", _conn);
+            command.CommandType = CommandType.Text;
+
+            // Set parameter values with explicit NpgsqlDbType
+            command.Parameters.AddWithValue("@empname", stud.c_empname);
+            command.Parameters.AddWithValue("@gender", stud.c_gender);
+            command.Parameters.AddWithValue("@shift", stud.c_shift);
+            command.Parameters.AddWithValue("@depid", stud.c_deptid);
+            command.Parameters.AddWithValue("@dob", stud.c_dob);
+            command.Parameters.AddWithValue("@image", stud.c_empimage);
+
+            command.ExecuteNonQuery();
+            _conn.Close();
+
+        }
+
+        public void Update(tblemp stud)
+        {
+            _conn.Open();
+            using var command = new NpgsqlCommand("UPDATE t_mcrud SET c_empname = @Name, c_gender = @Gender, c_address = @Address, c_language = @Languages, c_deptid = @DeptId, c_dob = @Dob, c_empimage = @EmpImage WHERE c_empid = @Id", _conn);
+            command.CommandType = CommandType.Text;
+
+            // Set parameter values with explicit NpgsqlDbType
+            command.Parameters.AddWithValue("@id", stud.c_empid);
+            command.Parameters.AddWithValue("@DocumentPath", stud.c_empname);
+            command.Parameters.AddWithValue("@empname", stud.c_empname);
+            command.Parameters.AddWithValue("@gender", stud.c_gender);
+            command.Parameters.AddWithValue("@shift", stud.c_shift);
+            command.Parameters.AddWithValue("@depid", stud.c_deptid);
+            command.Parameters.AddWithValue("@dob", stud.c_dob);
+            command.Parameters.AddWithValue("@image", stud.c_empimage);
+
+            command.ExecuteNonQuery();
+            _conn.Close();
+        }
+        public void Delete(int id)
+        {
+            using var command = new NpgsqlCommand("DELETE FROM t_mcrud WHERE c_id =@Id", _conn);
+               command.CommandType = CommandType.Text;
+               command.Parameters.AddWithValue("@Id", id);
+
+               _conn.Open();
+               command.ExecuteNonQuery();
+
+               _conn.Close();
+
+        }
     }
 }
