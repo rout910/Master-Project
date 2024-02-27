@@ -45,17 +45,21 @@
                     </div>
                     <div>
                         <label for="c_depid">Department:</label>
-                        <input id="department" />
+                        <select id="c_depid" name="c_depid" ></select>
+                    </div>
+                    <div>
+                        <label for="c_dob">Date of Joining:</label>
+                        <input type="date" id="c_dob" name="c_dob">
                     </div>
                     <div>
                         <label for="c_empimage">Employee Image:</label>
-                        <input type="file" id="c_empimage" name="c_empimage" accept=accept="image/*"><br />
+                        <input type="text" id="c_empimage" name="c_empimage" ><br />
                     </div>
                     <button type="button" id="submitForm">Save</button>
                 </form>
             `);
 
-            $("#department").kendoDropDownList({
+            $("#c_depid").kendoDropDownList({
                 optionLabel: "Select Department",
                 dataTextField: "c_dename",
                 dataValueField: "c_depid",
