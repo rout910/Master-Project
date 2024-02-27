@@ -27,11 +27,11 @@ namespace WEBAPI.Controllers
                 // int.Parse(HttpContext.User.Claims.First(i =>i.Type == "UserId").Value);
                
         }
-        // [HttpGet("{id}")]
-        // public tblemp GetOne(int id)
-        // {
-        //     return _emprepo.GetOne(id);
-        // }
+        [HttpGet("{id}")]
+        public tblemp GetOne(int id)
+        {
+            return _emprepo.GetOne(id);
+        }
 
 
         [HttpPost]

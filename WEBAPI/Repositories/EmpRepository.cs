@@ -58,10 +58,51 @@ namespace WEBAPI.Repositories
 
 
         }
+        public tblemp GetOne(int id)
+        {
+            try
+            {
+                _conn.Open();
+                using var command = new NpgsqlCommand("SELECT * FROM t_mcrud WHERE c_empid = @Id", _conn);
+                command.Parameters.AddWithValue("@Id", id);
+
+                using var reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    return new tblemp
+                    {
+                        c_empid = Convert.ToInt32(reader["c_empid"]),
+                        c_empname = reader["c_empname"].ToString(),
+                        c_gender = reader["c_gender"].ToString(),
+                        c_shift = reader["c_shift"].ToString(),
+                        c_deptid = Convert.ToInt32(reader["c_depid"]),
+                        c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
+                        c_empimage = reader["c_empimage"].ToString()
+                    };
+                }
+                else
+                {
+                    // Return null or handle case where student with the given ID is not found
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // Handle exception (log, display error message, etc.)
+                return null;
+            }
+            finally
+            {
+                _conn.Close();
+            }
+        }
+
 
         public void Insert(tblemp stud)
         {
-               _conn.Open();
+            _conn.Open();
             using var command = new NpgsqlCommand("INSERT INTO t_mcrud(c_empname, c_gender, c_shift, c_depid, c_dob, c_empimage) VALUES (@empname, @gender, @shift, @depid, @dob, @image)", _conn);
             command.CommandType = CommandType.Text;
 
@@ -100,13 +141,13 @@ namespace WEBAPI.Repositories
         public void Delete(int id)
         {
             using var command = new NpgsqlCommand("DELETE FROM t_mcrud WHERE c_empid =@Id", _conn);
-               command.CommandType = CommandType.Text;
-               command.Parameters.AddWithValue("@Id", id);
+            command.CommandType = CommandType.Text;
+            command.Parameters.AddWithValue("@Id", id);
 
-               _conn.Open();
-               command.ExecuteNonQuery();
+            _conn.Open();
+            command.ExecuteNonQuery();
 
-               _conn.Close();
+            _conn.Close();
 
         }
     }
