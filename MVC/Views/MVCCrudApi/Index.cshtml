@@ -1,0 +1,83 @@
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    @* if (localStorage.getItem('token') == null) {
+        window.location = '/UserMVC/Login';
+    } *@
+
+    $(document).ready(function () {
+        LoadProduct();
+    });
+
+    function LoadProduct() {
+        var settings = {
+            "url": "https://localhost:7123/api/CrudApi",
+            "method": "GET",
+            "timeout": 0,
+           // "headers": { "Authorization": 'Bearer ' + localStorage.getItem('token') }
+        };
+
+        $.ajax(settings).done(function (response) {
+            var Products = "";
+            $.each(response,
+                function (index, value) {
+                    Products += '<tr>'
+                        + '<td><a href="/MVCCrudApi/Update/?id=' + value.c_empid + '" class="btn btn-primary">Edit</a></td>'
+                        + '<td>' + value.c_empid + '</td>'
+                        + '<td>' + value.c_empname + '</td>'
+                        + '<td>' + value.c_gender + '</td>'
+                        + '<td>' + value.c_deptid + '</td>'
+                        + '<td>' + value.c_empimage + '</td>'
+                        + '<td>' + value.c_dob + '</td>'
+                        + '<td>' + value.c_shift + '</td>'
+                        + '<td><button onclick="DeleteProduct(' + value.c_empid + ')" class="btn btn-danger">Delete</button></td>'
+                        + '</tr>';
+                });
+            $('#tableProduct tbody').append(Products);
+        });
+    }
+
+    function DeleteProduct(c_empid) {
+        if (confirm("Do you want to delete?") == true) {
+            var settings = {
+                "url": "https://localhost:7123/api/CrudApi/" + c_empid,
+                "method": "DELETE",
+                "timeout": 0,
+              //  "headers": { "Authorization": 'Bearer ' + localStorage.getItem('token') }
+            }
+            $.ajax(settings).done(function (response) {
+                window.location = "/MVCCrudApi/Index";
+            });
+
+        }
+    }
+</script>
+
+<br /><br />
+
+<a href="/MVCCrudApi/Update" class="btn btn-primary">Add New Employee</a>
+
+<table class="table table-bordered table-hover" id="tableProduct">
+    <thead class="thead-dark">
+        <tr>
+            <th>Edit</th>
+            <th>Id</th>
+            <th>Employee Name</th>
+            <th>Gender</th>
+            <th>Department Id</th>
+            <th>Image</th>
+            <th>Date</th>
+            <th>Shift</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Product data will be inserted here -->
+    </tbody>
+</table>
