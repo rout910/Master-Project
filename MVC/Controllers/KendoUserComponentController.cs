@@ -54,7 +54,7 @@ public IActionResult Login(tbluser user)
     {
         if(HttpContext.Session.GetString("c_userrole")=="Admin")
         {
-            return RedirectToAction("Insert", "KendoUserComponent");
+            return RedirectToAction("Index", "KendoUserComponent");
         
         }
         else

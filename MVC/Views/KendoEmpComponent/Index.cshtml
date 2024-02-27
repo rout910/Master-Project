@@ -1,0 +1,83 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Kendo UI Grid Example</title>
+            <!-- Kendo UI CSS -->
+            <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.1.119/styles/kendo.default.min.css">
+
+            <!-- jQuery -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+            <!-- Kendo UI JavaScript -->
+            <script src="https://kendo.cdn.telerik.com/2022.1.119/js/kendo.all.min.js"></script>
+        </head>
+        <body>
+            <div id="grid"></div>
+
+            <script>
+                $(document).ready(function () {
+                    $("#grid").kendoGrid({
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: "https://localhost:7028/kendoempcomponent/index", // Endpoint to fetch data
+                                    type:"GET",
+                                    dataType: "json"
+                                },
+                                create: {
+                                    url: "https://localhost:7028/kendoempcomponent/create", // Endpoint to insert data
+                                    dataType: "json",
+                                    type: "POST"
+                                },
+                                update: {
+                                    url: "https://localhost:7028/kendoempcomponent/update", // Endpoint to update data
+                                    dataType: "json",
+                                    type: "PUT"
+                                },
+                                destroy: {
+                                    url: "https://localhost:7028/kendoempcomponent/delete", // Endpoint to delete data
+                                    dataType: "json",
+                                    type: "DELETE"
+                                },
+                            },
+                            schema: {
+                                model: {
+                                    id: "c_empid",
+                                    fields: {
+                                        c_empid: { type: "number", editable: false },
+                                        c_empname: { type: "string" },
+                                        c_gender: { type: "string" },
+                                        c_dob: { type: "date" },
+                                        c_shift: { type: "string" },
+                                        c_deptid: { type: "number" },
+                                        c_empimage: { type: "string" }
+                                    }
+                                }
+                            },
+                            pageSize: 10 // Number of records per page
+                        },
+                        height: 550,
+                        scrollable: true,
+                        sortable: true,
+                        pageable: true,
+                        editable: {
+                            mode: "inline", // Inline editing mode
+                            confirmation: true // Confirmation for delete operation
+                        },
+                        toolbar: ["create"], // Show a "create" button for inserting new records
+                        columns: [
+                            { field: "c_empid", title: "Employee ID", width: "150px" },
+                            { field: "c_empname", title: "Employee Name" },
+                            { field: "c_gender", title: "Gender" },
+                            { field: "c_dob", title: "Date of Birth", format: "{0:MM/dd/yyyy}" },
+                            { field: "c_shift", title: "Shift" },
+                            { field: "c_deptid", title: "Department ID", width: "150px" },
+                            { field: "c_empimage", title: "Employee Image", width: "150px" },
+                            { command: ["edit", "destroy"], title: "&nbsp;", width: "250px" } // Edit and delete buttons
+                        ]
+                    });
+                });
+            </script>
+        </body>
+        </html>
