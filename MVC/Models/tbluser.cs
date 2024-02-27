@@ -12,5 +12,6 @@ namespace MVC.Models
         public string c_username {get; set;}
         public string c_password{get; set;}
         public string c_userrole{get; set;}
+        
     }
-}
+}   
