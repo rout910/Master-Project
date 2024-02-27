@@ -8,8 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IEmpRepository, EmpRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>(); // Replace UserRepository with the actual implementation class
+
 builder.Services.AddSingleton<NpgsqlConnection>((serviceProvider) =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();

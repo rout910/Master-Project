@@ -88,8 +88,8 @@ namespace WEBAPI.Repositories
                 var role = reader["c_userrole"].ToString();
                 // var emailid = reader["c_emailid"].ToString();
                 // var username=reader["c_username"].ToString();
-                var session = _httpContextAccessor.HttpContext.Session;
-                session.SetString("role",role);
+                // var session = _httpContextAccessor.HttpContext.Session;
+                // session.SetString("role",role);
                 // session.SetString("emailid",emailid);
                 // session.SetString("username",username);
                 return true;
