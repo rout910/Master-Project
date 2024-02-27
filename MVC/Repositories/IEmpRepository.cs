@@ -17,5 +17,7 @@ namespace MVC.Repositories
 
 
         void  Delete (int id);
+
+        tblemp GetOne(int id);
     }
 }
