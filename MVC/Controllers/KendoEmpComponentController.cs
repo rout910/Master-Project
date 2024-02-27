@@ -17,21 +17,56 @@ public class KendoEmpComponentController : Controller
     }
 
     
-    public IActionResult Index()
+    
+        public IActionResult Index()
         {
             var emp = _empRepo.GetAll();
             return View(emp);
         }
 
+        
+        public IActionResult GetDeptName()
+        {
+            var emp = _empRepo.GetDept();
+            return Json(emp);
+
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            
+            var departments =  _empRepo.GetDept();
+                if (departments == null)
+    {
+        // Handle the case where departments are not retrieved properly
+        // You may want to return an error view or display an error message
+        // For now, returning an empty list to prevent null reference exception
+        departments = new List<tbldept>(); // Change Department to your department class
+    }
+           
+            
+           // ViewBag.Departments = departments;
+            return View();
+
+        }
+
+       
+
         [HttpPost]
-        public IActionResult Create([FromBody] tblemp emp)
+        public IActionResult Create(tblemp emp)
         {
             if (ModelState.IsValid)
-            {
-                _empRepo.Insert(emp);
-                return Json(emp);
-            }
-            return BadRequest(ModelState);
+    {
+        _empRepo.Insert(emp);
+        return Json(emp);
+    }
+    else
+    {
+        var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                      .Select(e => e.ErrorMessage);
+        return BadRequest(errors);
+    }
         }
 
         [HttpPut]

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Employee</title>
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.1.301/styles/kendo.default-v2.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2022.1.301/js/kendo.all.min.js"></script>
+</head>
+<body>
+    <div>
+        <h2>Add Employee</h2>
+        <button id="btnAddEmployee">Add Employee</button>
+        <div id="addEmployeeWindow"></div>
+    </div>
+
+    <script>
+    $(document).ready(function () {
+        $("#btnAddEmployee").click(function () {
+            $("#addEmployeeWindow").kendoWindow({
+                title: "Add Employee",
+                width: "500px",
+                modal: true,
+                visible: false,
+                resizable: true,
+                draggable: true
+            }).data("kendoWindow").center().open().content(`
+                <form id="addEmployeeForm" enctype="multipart/form-data">
+                    <div>
+                        <label for="c_empname">Employee Name:</label>
+                        <input type="text" id="c_empname" name="c_empname" />
+                    </div>
+                    <div>
+                        Gender: <br />
+                        <input type="radio" id="male" name="c_gender" value="Male">
+                        <label for="male">Male</label>
+                        <input type="radio" id="female" name="c_gender" value="Female">
+                        <label for="female">Female</label>
+                    </div>
+                    <div>
+                        Shift: <br />
+                        <input type="checkbox" id="c_shift" name="c_shift" value="Morning">
+                        <label for="morningShift">Morning</label>
+                        <input type="checkbox" id="c_shift" name="c_shift" value="Night">
+                        <label for="nightShift">Night</label>
+                    </div>
+                    <div>
+                        <label for="c_depid">Department:</label>
+                        <input id="department" />
+                    </div>
+                    <div>
+                        <label for="c_empimage">Employee Image:</label>
+                        <input type="file" id="c_empimage" name="c_empimage" accept=accept="image/*"><br />
+                    </div>
+                    <button type="button" id="submitForm">Save</button>
+                </form>
+            `);
+
+            $("#department").kendoDropDownList({
+                optionLabel: "Select Department",
+                dataTextField: "c_dename",
+                dataValueField: "c_depid",
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "https://localhost:7028/kendoempcomponent/getdeptname",
+                            dataType: "json"
+                        }
+                    }
+                }
+            });
+
+            // Handle form submission
+            $("#submitForm").click(function () {
+                $.ajax({
+                    url: "https://localhost:7028/kendoempcomponent/create",
+                    type: "POST",
+                    data: new FormData($("#addEmployeeForm")[0]),
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // Handle success response
+                        console.log(response);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

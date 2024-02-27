@@ -1,83 +1,200 @@
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Kendo UI Grid Example</title>
-            <!-- Kendo UI CSS -->
-            <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.1.119/styles/kendo.default.min.css">
+@model List<MVC.Models.tblemp>
 
-            <!-- jQuery -->
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kendo UI Component Example</title>
+    <!-- Kendo UI CSS -->
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.1.119/styles/kendo.default.min.css">
+ <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.1.301/styles/kendo.default-v2.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2022.1.301/js/kendo.all.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 20px;
+        }
 
-            <!-- Kendo UI JavaScript -->
-            <script src="https://kendo.cdn.telerik.com/2022.1.119/js/kendo.all.min.js"></script>
-        </head>
-        <body>
-            <div id="grid"></div>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-            <script>
-                $(document).ready(function () {
-                    $("#grid").kendoGrid({
-                        dataSource: {
-                            type: "json",
-                            transport: {
-                                read: {
-                                    url: "https://localhost:7028/kendoempcomponent/index", // Endpoint to fetch data
-                                    type:"GET",
-                                    dataType: "json"
-                                },
-                                create: {
-                                    url: "https://localhost:7028/kendoempcomponent/create", // Endpoint to insert data
-                                    dataType: "json",
-                                    type: "POST"
-                                },
-                                update: {
-                                    url: "https://localhost:7028/kendoempcomponent/update", // Endpoint to update data
-                                    dataType: "json",
-                                    type: "PUT"
-                                },
-                                destroy: {
-                                    url: "https://localhost:7028/kendoempcomponent/delete", // Endpoint to delete data
-                                    dataType: "json",
-                                    type: "DELETE"
-                                },
-                            },
-                            schema: {
-                                model: {
-                                    id: "c_empid",
-                                    fields: {
-                                        c_empid: { type: "number", editable: false },
-                                        c_empname: { type: "string" },
-                                        c_gender: { type: "string" },
-                                        c_dob: { type: "date" },
-                                        c_shift: { type: "string" },
-                                        c_deptid: { type: "number" },
-                                        c_empimage: { type: "string" }
-                                    }
-                                }
-                            },
-                            pageSize: 10 // Number of records per page
-                        },
-                        height: 550,
-                        scrollable: true,
-                        sortable: true,
-                        pageable: true,
-                        editable: {
-                            mode: "inline", // Inline editing mode
-                            confirmation: true // Confirmation for delete operation
-                        },
-                        toolbar: ["create"], // Show a "create" button for inserting new records
-                        columns: [
-                            { field: "c_empid", title: "Employee ID", width: "150px" },
-                            { field: "c_empname", title: "Employee Name" },
-                            { field: "c_gender", title: "Gender" },
-                            { field: "c_dob", title: "Date of Birth", format: "{0:MM/dd/yyyy}" },
-                            { field: "c_shift", title: "Shift" },
-                            { field: "c_deptid", title: "Department ID", width: "150px" },
-                            { field: "c_empimage", title: "Employee Image", width: "150px" },
-                            { command: ["edit", "destroy"], title: "&nbsp;", width: "250px" } // Edit and delete buttons
-                        ]
-                    });
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tbody tr:hover {
+            background-color: #f2f2f2;
+        }
+
+        .action-buttons button {
+            padding: 8px 12px;
+            margin-right: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .action-buttons button.updateEmployee {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .action-buttons button.deleteEmployee {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .action-buttons button:hover {
+            background-color: #555;
+        }
+
+        #addEmployee {
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #addEmployee:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+   @* <a class="btn btn-primary" asp-action="Create">Add New Student</a> *@
+    <div>
+        <button id="btnAddEmployee">Add Employee</button>
+        <div id="addEmployeeWindow"></div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>Shift</th>
+                <th>Department ID</th>
+                <th>Employee Image</th>
+                <th>Action</th> <!-- New column for action buttons -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.c_empid</td>
+                    <td>@item.c_empname</td>
+                    <td>@item.c_gender</td>
+                    <td>@item.c_dob.ToString("MM/dd/yyyy")</td>
+                    <td>@item.c_shift</td>
+                    <td>@item.c_depid</td>
+                    <td>@item.c_empimage</td>
+                    <td class="action-buttons">
+                        <!-- Update and Delete buttons for each row -->
+                        <button class="updateEmployee" data-id="@item.c_empid">Update</button>
+                        <button class="deleteEmployee" data-id="@item.c_empid">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    
+    <script>
+    $(document).ready(function () {
+        $("#btnAddEmployee").click(function () {
+            // Open the Kendo Window
+            $("#addEmployeeWindow").kendoWindow({
+                title: "Add Employee",
+                width: "500px",
+                modal: true,
+                visible: false,
+                resizable: true,
+                draggable: true
+            }).data("kendoWindow").center().open().content(`
+                <form id="addEmployeeForm" enctype="multipart/form-data">
+                    <div>
+                        <label for="c_empname">Employee Name:</label>
+                        <input type="text" id="c_empname" name="c_empname" />
+                    </div>
+                    <div>
+                        Gender: <br />
+                        <input type="radio" id="male" name="c_gender" value="Male">
+                        <label for="male">Male</label>
+                        <input type="radio" id="female" name="c_gender" value="Female">
+                        <label for="female">Female</label>
+                    </div>
+                    <div>
+                        Shift: <br />
+                        <input type="checkbox" id="morningShift" name="c_morningShift" value="Morning">
+                        <label for="morningShift">Morning</label>
+                        <input type="checkbox" id="nightShift" name="c_nightShift" value="Night">
+                        <label for="nightShift">Night</label>
+                    </div>
+                    <div>
+                        <label for="c_depid">Department:</label>
+                        <input id="department" />
+                    </div>
+                    <div>
+                        <label for="c_empimage">Employee Image:</label>
+                        <input type="file" id="c_empimage" name="c_empimage" accept="image/*" />
+                    </div>
+                    <button type="submit">Save</button>
+                </form>
+            `);
+
+            // Initialize the Kendo DropDownList for departments
+            $("#department").kendoDropDownList({
+                optionLabel: "Select Department",
+                dataTextField: "c_dename",
+                dataValueField: "c_depid",
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "https://localhost:7028/kendoempcomponent/getdeptname", // Endpoint to fetch departments
+                            dataType: "json"
+                        }
+                    }
+                }
+            });
+            $("#submitForm").click(function () {
+                $.ajax({
+                    url: "URL_TO_SUBMIT_FORM_DATA_TO",
+                    type: "POST",
+                    data: new FormData($("#addEmployeeForm")[0]),
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // Handle success response
+                        console.log(response);
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle error
+                        console.log(error);
+                    }
                 });
-            </script>
-        </body>
-        </html>
+        });
+    });
+</script>
+
+</body>
+</html>
