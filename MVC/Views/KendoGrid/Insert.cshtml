@@ -1,0 +1,92 @@
+@model MVC.Models.tbluser
+
+<!-- Kendo UI Stylesheet -->
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2022.1.119/styles/kendo.default-v2.min.css">
+
+<style>
+    .k-form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .k-form-field {
+        margin-bottom: 15px;
+    }
+
+    .k-form-field label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .k-textbox {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+    .k-button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    .k-button:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<form id="form" asp-controller="KendoGrid" asp-action="Insert" method="post" class="k-form">
+    <div class="k-form-field">
+        <label asp-for="c_emailid"></label>
+        <input class="k-textbox" asp-for="c_emailid" />
+    </div>
+    <div class="k-form-field">
+        <label asp-for="c_username"></label>
+        <input class="k-textbox" asp-for="c_username" />
+    </div>
+    <div class="k-form-field">
+        <label asp-for="c_password"></label>
+        <input class="k-textbox" type="password" asp-for="c_password" />
+    </div>
+    <div class="k-form-field">
+        <label>Confirm Password</label>
+        <input class="k-textbox" type="password" id="confirmPassword" name="confirmPassword" />
+    </div>
+    <button type="submit" class="k-button">Submit</button>
+</form>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Kendo UI Scripts -->
+<script src="https://kendo.cdn.telerik.com/2022.1.119/js/kendo.all.min.js"></script>
+<!-- Kendo UI Validator Script -->
+<script>
+    $(document).ready(function () {
+        $("#form").kendoValidator({
+            rules: {
+                confirmPassword: function (input) {
+                    if (input.is("[name='c_password']")) {
+                        return input.val() === $("#confirmPassword").val();
+                    }
+                    return true;
+                }
+            },
+            messages: {
+                confirmPassword: "Passwords do not match"
+            }
+        });
+    });
+</script>
