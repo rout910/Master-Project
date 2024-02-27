@@ -12,7 +12,7 @@ namespace MVC.Models
         public string  c_gender{get;set;}
         public DateOnly c_dob{get;set;}
         public string c_shift{get;set;}
-        public int c_deptid{get;set;}
+        public int c_depid{get;set;}
         public string c_empimage{get;set;}
        
 

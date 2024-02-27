@@ -9,6 +9,7 @@ namespace MVC.Repositories
     public interface IEmpRepository
     {
         List<tblemp> GetAll();
+        List<tbldept> GetDept();
 
         void Insert (tblemp stud);
 

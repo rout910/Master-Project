@@ -35,7 +35,7 @@ namespace MVC.Repositories
                         c_empname = reader["c_empname"].ToString(),
                         c_gender = reader["c_gender"].ToString(),
                         c_shift = reader["c_shift"].ToString(),
-                        c_deptid = Convert.ToInt32(reader["c_depid"]),
+                        c_depid = Convert.ToInt32(reader["c_depid"]),
                         c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
                         c_empimage = reader["c_empimage"].ToString()
                     };
@@ -53,6 +53,42 @@ namespace MVC.Repositories
             }
 
             return students;
+
+
+        }
+
+        public List<tbldept> GetDept()
+        {
+            List<tbldept> departments = new List<tbldept>();
+
+            try
+            {
+                _conn.Open();
+                using var command = new NpgsqlCommand("SELECT * FROM t_department", _conn);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    tbldept department = new tbldept
+                    {
+                        c_depid = Convert.ToInt32(reader["c_depid"]),
+                        c_dename = reader["c_dename"].ToString()
+                    };
+
+                    departments.Add(department);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                _conn.Close();
+            }
+
+            return departments;
 
 
         }
@@ -74,7 +110,7 @@ namespace MVC.Repositories
                         c_empname = reader["c_empname"].ToString(),
                         c_gender = reader["c_gender"].ToString(),
                         c_shift = reader["c_shift"].ToString(),
-                        c_deptid = Convert.ToInt32(reader["c_depid"]),
+                        c_depid = Convert.ToInt32(reader["c_depid"]),
                         c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
                         c_empimage = reader["c_empimage"].ToString()
                     };
@@ -108,7 +144,7 @@ namespace MVC.Repositories
             command.Parameters.AddWithValue("@empname", stud.c_empname);
             command.Parameters.AddWithValue("@gender", stud.c_gender);
             command.Parameters.AddWithValue("@shift", stud.c_shift);
-            command.Parameters.AddWithValue("@depid", stud.c_deptid);
+            command.Parameters.AddWithValue("@depid", stud.c_depid);
             command.Parameters.AddWithValue("@dob", stud.c_dob);
             command.Parameters.AddWithValue("@image", stud.c_empimage);
 
@@ -129,7 +165,7 @@ namespace MVC.Repositories
             command.Parameters.AddWithValue("@Name", stud.c_empname);
             command.Parameters.AddWithValue("@Gender", stud.c_gender);
             command.Parameters.AddWithValue("@shift", stud.c_shift);
-            command.Parameters.AddWithValue("@DeptId", stud.c_deptid);
+            command.Parameters.AddWithValue("@DeptId", stud.c_depid);
             command.Parameters.AddWithValue("@Dob", stud.c_dob);
             command.Parameters.AddWithValue("@EmpImage", stud.c_empimage);
 
