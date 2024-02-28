@@ -150,5 +150,38 @@ namespace WEBAPI.Repositories
             _conn.Close();
 
         }
+        public List<tbldept> GetDept()
+        {
+            List<tbldept> departments = new List<tbldept>();
+
+            try
+            {
+                _conn.Open();
+                using var command = new NpgsqlCommand("SELECT * FROM t_department", _conn);
+
+                using var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    tbldept department = new tbldept
+                    {
+                        c_deptid = Convert.ToInt32(reader["c_depid"]),
+                        c_dename = reader["c_dename"].ToString()
+                    };
+
+                    departments.Add(department);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                _conn.Close();
+            }
+
+            return departments;
+        }
     }
 }

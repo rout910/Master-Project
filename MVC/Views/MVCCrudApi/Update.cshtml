@@ -1,3 +1,5 @@
+
+
 @{
     ViewBag.Title = "Update";
     @* Layout = "~/Views/Shared/_ProducttLayout.cshtml"; *@
@@ -13,13 +15,12 @@
 
 
 <script>
-
     $(document).ready(function () {
+        LoadDepartment();
         if (@ViewBag.c_empid > 0) {
             LoadOneProduct();
         }
     });
-
 
     function LoadOneProduct() {
         var settings = {
@@ -29,16 +30,14 @@
             "headers": { "Authorization": 'Bearer ' + localStorage.getItem('token') }
         };
 
-
         $.ajax(settings).done(function (response) {
             $("#c_empname").val(response.c_empname);
             $("input[name='c_gender'][value='" + response.c_gender + "']").prop("checked", true);
 
-
             // Checkbox logic
             var Shifts = response.c_shift.split(", ");
             Shifts.forEach(function (c_shift) {
-                $(".c_shift[value='" + c_shift + "']").prop("checked", true);
+                $("input[name='c_shift'][value='" + c_shift + "']").prop("checked", true);
             });
             // End of checkbox logic
 
@@ -48,15 +47,30 @@
 
         });
     }
+    function LoadDepartment(){
+    var settings = {
+        "url": "https://localhost:7123/api/CrudApi/GetAllDepartment",
+        "method": "GET",
+        "timeout": 0
+    };
+    $.ajax(settings).done(function (response) {
+       
+            $.each(response, function(Update, department) {
+                $('#c_depid').append($('<option>', {
+                value: department.c_depid,
+                text: department.c_dename
+            }));
+        });
 
+    });
+}
 
     function UpdateProduct() {
         var addProduct = {
             c_empid: $("#c_empid").val(),
             c_empname: $("#c_empname").val(),
             c_gender: $("input[name='c_gender']:checked").val(),
-
-            c_shift: $("#c_shift").val(),
+            c_shift: $("input[name='c_shift']:checked").map(function () { return $(this).val(); }).get(), // Get array of checked checkbox values
             c_depid: $("#c_depid").val(),
             c_dob: $("#c_dob").val(),
             c_empimage: $("#c_empimage").val()
@@ -67,7 +81,7 @@
             c_empid: $("#c_empid").val(),
             c_empname: $("#c_empname").val(),
             c_gender: $("input[name='c_gender']:checked").val(),
-            c_shift: $("#c_shift").val(),
+            c_shift: $("input[name='c_shift']:checked").map(function () { return $(this).val(); }).get(), // Get array of checked checkbox values
             c_depid: $("#c_depid").val(),
             c_dob: $("#c_dob").val(),
             c_empimage: $("#c_empimage").val()
@@ -88,7 +102,7 @@
             settings.method = "POST"; // Add forward slash
             settings.data = JSON.stringify(addProduct);
         } else {
-            settings.url = "https://localhost:7123/api/CrudApi";
+            settings.url = "https://localhost:7123/api/CrudApi/";
             settings.method = "PUT";
             settings.data = JSON.stringify(updateProduct);
         }
@@ -102,10 +116,8 @@
 
 
     }
-
-
-
 </script>
+
 <div class="form-horizontal">
     <div class="form-group">
         <div>
@@ -122,11 +134,11 @@
         <div class="form-group">
             <label>Gender</label>
             <div class="form-check">
-                <input type="radio" name="c_gender" id="male" class="form-check-input" value="male">
+                <input type="radio" name="c_gender" id="male" class="form-check-input" value="Male">
                 <label class="form-check-label" for="male">Male</label>
             </div>
             <div class="form-check">
-                <input type="radio" name="c_gender" id="female" class="form-check-input" value="female">
+                <input type="radio" name="c_gender" id="female" class="form-check-input" value="Female">
                 <label class="form-check-label" for="female">Female</label>
             </div>
         </div>
@@ -142,10 +154,15 @@
 
         </div>
 
-        <div class="form-group">
-            <label for="c_depid">Course ID</label>
-            <input type="text" name="c_depid" id="c_depid" class="form-control" />
+           <div class="form-group">
+            <label for="c_depid">Department</label>
+            <select id="c_depid">
+                <option value="">Select a Department...</option>
+            </select>
+
         </div>
+
+        
 
 
 

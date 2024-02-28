@@ -43,6 +43,14 @@ namespace WEBAPI.Controllers
             return Ok();
         }
 
+         [HttpGet]
+        [Route("GetAllDepartment")]
+        public IActionResult GetAllDepartment()
+        {
+            List<tbldept> courses = _emprepo.GetDept();
+            return Ok(courses);
+        }
+
 
         [HttpPut]
         public void Update(tblemp stud)

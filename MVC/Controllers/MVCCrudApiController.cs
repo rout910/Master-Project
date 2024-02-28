@@ -4,21 +4,24 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
+using MVC.Repositories;
 
 
 namespace MVC.Controllers
 {
    //
-  [Route("[controller]")]
+   [Route("[controller]")]
     public class MVCCrudApiController : Controller
     {
-
+        private readonly IEmpRepository _emp;
         private readonly ILogger<MVCCrudApiController> _logger;
 
-        public MVCCrudApiController(ILogger<MVCCrudApiController> logger)
+        public MVCCrudApiController(ILogger<MVCCrudApiController> logger,IEmpRepository empRepository)
         {
             _logger = logger;
+            _emp = empRepository;
            
         }
 
@@ -31,12 +34,15 @@ namespace MVC.Controllers
          [Route("Update")]
          [HttpGet("{id})")]
          
-        public IActionResult Update(int id = 0)
+        public IActionResult Update(int id)
         {
-            ViewBag.id = id;
-            
+            ViewBag.c_empid = id;
+            ViewBag.Title = "Update";
             return View(id);
+            var department = _emp.GetDept();
+            ViewBag.Departments = department;
         }
+
 
 
 

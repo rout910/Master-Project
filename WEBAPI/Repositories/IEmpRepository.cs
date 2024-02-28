@@ -19,5 +19,7 @@ namespace WEBAPI.Repositories
         void  Delete (int id);
 
         tblemp GetOne(int id);
+
+        List<tbldept> GetDept();
     }
 }
