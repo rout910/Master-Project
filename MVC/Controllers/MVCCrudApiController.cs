@@ -38,9 +38,12 @@ namespace MVC.Controllers
         {
             ViewBag.c_empid = id;
             ViewBag.Title = "Update";
-            return View(id);
             var department = _emp.GetDept();
             ViewBag.Departments = department;
+            return View(id);
+          
+
+            
         }
 
 
