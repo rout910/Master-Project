@@ -9,83 +9,104 @@ public class KendoEmpComponentController : Controller
 {
     private readonly ILogger<KendoEmpComponentController> _logger;
     private readonly IEmpRepository _empRepo;
+    private readonly IWebHostEnvironment _env;
 
-    public KendoEmpComponentController(ILogger<KendoEmpComponentController> logger, IEmpRepository empRepo)
+    public KendoEmpComponentController(ILogger<KendoEmpComponentController> logger, IEmpRepository empRepo, IWebHostEnvironment env)
     {
         _logger = logger;
         _empRepo = empRepo;
+        _env = env;
     }
 
-    
-    
-        public IActionResult Index()
-        {
-            var emp = _empRepo.GetAll();
-            return View(emp);
-        }
 
-        
-        public IActionResult GetDeptName()
-        {
-            var emp = _empRepo.GetDept();
-            return Json(emp);
 
-        }
-
-        [HttpGet]
-        public IActionResult Create()
-        {
-            
-            var departments =  _empRepo.GetDept();
-                if (departments == null)
+    public IActionResult Index()
     {
-        // Handle the case where departments are not retrieved properly
-        // You may want to return an error view or display an error message
-        // For now, returning an empty list to prevent null reference exception
-        departments = new List<tbldept>(); // Change Department to your department class
+        var emp = _empRepo.GetAll();
+        return View(emp);
     }
-           
-            
-           // ViewBag.Departments = departments;
-            return View();
 
-        }
 
-       
-
-        [HttpPost]
-        public IActionResult Create(tblemp emp)
-        {
-            if (ModelState.IsValid)
+    public IActionResult GetDeptName()
     {
-        _empRepo.Insert(emp);
+        var emp = _empRepo.GetDept();
         return Json(emp);
+
     }
-    else
+
+    [HttpGet]
+    public IActionResult Create()
     {
-        var errors = ModelState.Values.SelectMany(v => v.Errors)
-                                      .Select(e => e.ErrorMessage);
-        return BadRequest(errors);
+
+        var departments = _empRepo.GetDept();
+        if (departments == null)
+        {
+            // Handle the case where departments are not retrieved properly
+            // You may want to return an error view or display an error message
+            // For now, returning an empty list to prevent null reference exception
+            departments = new List<tbldept>(); // Change Department to your department class
+        }
+
+
+        // ViewBag.Departments = departments;
+        return View();
+
     }
+
+
+    public static string img="";
+    [HttpPost]
+    public IActionResult Create(tblemp emp,IFormFile file)
+    {
+            
+
+            emp.c_empimage = img;
+            _empRepo.Insert(emp);
+            return Json(emp);
+        
+      
+    
+    return Json("abc");
+    }
+
+    [HttpPost]
+public IActionResult UploadImage(IFormFile file)
+{
+    if (file != null && file.Length > 0)
+    {
+        var uploads = Path.Combine(_env.WebRootPath, "images"); // Assuming you have a folder named 'image' in wwwroot
+        var filePath = Path.Combine(uploads, file.FileName);
+
+        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            file.CopyTo(fileStream);
         }
 
-        [HttpPut]
-        public IActionResult Update(int id, [FromBody] tblemp emp)
-        {
-            if (ModelState.IsValid)
-            {
-                _empRepo.Update(emp);
-                return Json(emp);
-            }
-            return BadRequest(ModelState);
-        }
+        var imageUrl = "/images/" + file.FileName; // Assuming your image URL is relative
+        img = imageUrl;
+        return Json(new { imageUrl });
+    }
+    return Json(new { error = "No file uploaded or file is empty." });
+}
+    
 
-        [HttpDelete]
-        public IActionResult Delete(int id)
+    [HttpPut]
+    public IActionResult Update(int id, [FromBody] tblemp emp)
+    {
+        if (ModelState.IsValid)
         {
-            _empRepo.Delete(id);
-            return Ok();
+            _empRepo.Update(emp);
+            return Json(emp);
         }
+        return BadRequest(ModelState);
+    }
+
+    [HttpDelete]
+    public IActionResult Delete(int id)
+    {
+        _empRepo.Delete(id);
+        return Ok();
+    }
 
     public IActionResult Privacy()
     {

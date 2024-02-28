@@ -52,8 +52,8 @@
                         <input type="date" id="c_dob" name="c_dob">
                     </div>
                     <div>
-                        <label for="c_empimage">Employee Image:</label>
-                        <input type="text" id="c_empimage" name="c_empimage" ><br />
+                        <label for="ImageFile">Employee Image:</label>
+                        <input type="file" id="ImageFile" name="file" ><br />
                     </div>
                     <button type="button" id="submitForm">Save</button>
                 </form>
@@ -67,18 +67,46 @@
                     transport: {
                         read: {
                             url: "https://localhost:7028/kendoempcomponent/getdeptname",
-                            dataType: "json"
+                            dataType: "json",
+                            
                         }
                     }
                 }
             });
+            $("#ImageFile").kendoUpload({
+    async: {
+        saveUrl: "https://localhost:7028/kendoempcomponent/uploadimage",
+        autoUpload: true
+    },
+    upload: function (e) {
+        // You can add additional logic here if needed
+        console.log("Upload initiated...");
+    },
+    success: function (e) {
+        // Handle success response
+        console.log("Upload successful...");
+        console.log(e.response); // Response from the server, if any
+    },
+    error: function (e) {
+        // Handle error
+        console.error("Upload failed...");
+        console.log(e);
+    }
+});
+
+            
+
+            
 
             // Handle form submission
             $("#submitForm").click(function () {
+                
+                var formData = new FormData($("#addEmployeeForm")[0]);
+
                 $.ajax({
                     url: "https://localhost:7028/kendoempcomponent/create",
                     type: "POST",
-                    data: new FormData($("#addEmployeeForm")[0]),
+                    data: formData,
                     processData: false,
                     contentType: false,
                     success: function (response) {
@@ -97,3 +125,5 @@
 
 </body>
 </html>
+
+
