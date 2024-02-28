@@ -1,0 +1,67 @@
+@model tbluser
+
+@{
+    ViewBag.Title = "Login";
+    @* Layout = "~/Views/Shared/_ProductLayout.cshtml"; *@
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<div class="form-horizontal">
+    <div class="form-group">
+        <label for="c_username">Username</label>
+        <div class="col-md-10">
+            <input type="text" class="form-control" id="c_username">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="c_emailid">Email</label>
+        <div class="col-md-10">
+            <input type="text" class="form-control" id="c_emailid" name="c_emailid">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="c_password">Password</label>
+        <div class="col-md-10">
+            <input type="password" class="form-control" id="c_password">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Login" class="btn btn-primary" id="btnLogin" onclick="Login()" />
+        </div>
+    </div>
+</div>
+
+<script>
+    function Login() {
+        var user = {
+            c_username: $('#c_username').val(),
+            c_emailid: $('#c_emailid').val(),
+            c_password: $('#c_password').val()
+        };
+
+        var settings = {
+            "url": "https://localhost:7123/api/UserApi/Login",
+            "method": "POST",
+            "timeout": 0,
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "data": JSON.stringify(user)
+        };
+
+        $.ajax(settings)
+            .done(function (response) {
+                alert('Successfully Logged In!');
+                localStorage.setItem('token', response);
+                window.location = "/MVCCrudApi/Index";
+            })
+            .fail(function (response) {
+                alert(response.responseText);
+            });
+    }
+</script>

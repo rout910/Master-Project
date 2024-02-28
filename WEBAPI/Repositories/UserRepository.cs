@@ -11,13 +11,11 @@ namespace WEBAPI.Repositories
 {
     public class UserRepository : IUserRepository
     {
-          private readonly NpgsqlConnection _conn;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly NpgsqlConnection _conn;
 
-        public UserRepository(NpgsqlConnection connection, IHttpContextAccessor httpContextAccessor)
+        public UserRepository(NpgsqlConnection connection)
         {
             _conn = connection;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public void Register(tbluser user)
@@ -40,75 +38,84 @@ namespace WEBAPI.Repositories
             }
             finally
             {
-                    _conn.Close();           
+                _conn.Close();
             }
         }
 
-         public bool IsUser(string email)
-          {
-        try
+        public bool IsUser(string email)
         {
-            _conn.Open();
-            string query = "select * from t_muser where  c_emailid=@email";
-            var command = new NpgsqlCommand(query, _conn);
-            command.Parameters.AddWithValue("@email", email);
-            var reader = command.ExecuteReader();
-            if (reader.Read())
+            try
             {
-                return true;
+                _conn.Open();
+                string query = "select * from t_muser where  c_emailid=@email";
+                var command = new NpgsqlCommand(query, _conn);
+                command.Parameters.AddWithValue("@email", email);
+                var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-             else
-             {
-                return false;
-             }            
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                _conn.Close();
+            }
+            return false;
         }
-        catch (Exception e)
+
+        public bool Login(tbluser user)
+{
+    try
+    {
+        _conn.Open();  
+
+        // Prepare the SQL query with parameter placeholders
+        string query = "SELECT * FROM t_muser WHERE c_emailid = @email AND c_password = @password";
+        
+        // Create a NpgsqlCommand with the SQL query and connection
+        var cmd = new NpgsqlCommand(query, _conn);
+        
+        // Add parameter values to the command
+        cmd.Parameters.AddWithValue("@email", user.c_emailid);
+        cmd.Parameters.AddWithValue("@password", user.c_password); 
+        
+        // Execute the query and read the result
+        var reader = cmd.ExecuteReader();
+        
+        // Check if a user with the provided email and password exists
+        if (reader.Read())
         {
-            Console.WriteLine(e.Message);
-        }
-        finally
-        {
+            // Close connection
             _conn.Close();
+            
+            return true;
+        } 
+        else
+        {
+            // Close connection
+            _conn.Close();
+            
+            return false;
         }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error in Login method: {ex.Message}");
         return false;
     }
-
-    public bool Login(tbluser user)
+    finally
     {
-        try
-        {
-            _conn.Open();  
-            string query="SELECT * FROM t_muser WHERE c_emailid = @e And c_password=@p ";
-            var cmd = new NpgsqlCommand(query,_conn);
-            cmd.Parameters.AddWithValue("@e",user.c_emailid);
-            cmd.Parameters.AddWithValue("@p",user.c_password); 
-            var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                var role = reader["c_userrole"].ToString();
-                // var emailid = reader["c_emailid"].ToString();
-                // var username=reader["c_username"].ToString();
-                // var session = _httpContextAccessor.HttpContext.Session;
-                // session.SetString("role",role);
-                // session.SetString("emailid",emailid);
-                // session.SetString("username",username);
-                return true;
-            } 
-            else
-            {
-                return false;
-            }
-
-        }
-        catch (System.Exception)
-        {
-
-            throw;
-        }
-        finally
-        {
-            _conn.Close();
-        }
+        
+        _conn.Close();
     }
+}
     }
 }

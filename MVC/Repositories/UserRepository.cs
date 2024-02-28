@@ -10,7 +10,7 @@ namespace MVC.Repositories
 {
     public class UserRepository : IUserRepository
     {
-          private readonly NpgsqlConnection _conn;
+        private readonly NpgsqlConnection _conn;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UserRepository(NpgsqlConnection connection, IHttpContextAccessor httpContextAccessor)
@@ -30,6 +30,7 @@ namespace MVC.Repositories
                     command.Parameters.AddWithValue("@username", user.c_username);
                     command.Parameters.AddWithValue("@email", user.c_emailid);
                     command.Parameters.AddWithValue("@password", user.c_password);
+                    // command.Parameters.AddWithValue("@Role", user.c_userrole)
                     command.ExecuteNonQuery();
                 }
             }
@@ -39,75 +40,93 @@ namespace MVC.Repositories
             }
             finally
             {
-                    _conn.Close();           
+                _conn.Close();
             }
         }
 
-         public bool IsUser(string email)
-          {
-        try
+        public bool IsUser(string email)
         {
-            _conn.Open();
-            string query = "select * from t_muser where  c_emailid=@email";
-            var command = new NpgsqlCommand(query, _conn);
-            command.Parameters.AddWithValue("@email", email);
-            var reader = command.ExecuteReader();
-            if (reader.Read())
+            try
             {
-                return true;
+                _conn.Open();
+                string query = "select * from t_muser where  c_emailid=@email";
+                var command = new NpgsqlCommand(query, _conn);
+                command.Parameters.AddWithValue("@email", email);
+                var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-             else
-             {
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                _conn.Close();
+            }
+            return false;
+        }
+
+        public bool Login(tbluser user)
+        {
+            try
+            {
+                _conn.Open();
+
+                // string query = "SELECT * FROM t_muser WHERE c_emailid = @email AND c_password = @password";
+string query = "SELECT * FROM t_muser WHERE c_emailid = @email AND c_password = @password";
+
+                var cmd = new NpgsqlCommand(query, _conn);
+
+                cmd.Parameters.Add(new NpgsqlParameter
+                {
+                    ParameterName = "@email",
+                    NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text, // Set NpgsqlDbType
+                    Value = user.c_emailid // Set Value
+                });
+                cmd.Parameters.Add(new NpgsqlParameter
+                {
+                    ParameterName = "@password",
+                    NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text, // Set NpgsqlDbType
+                    Value = user.c_password // Set Value
+                });
+
+                var reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    var role = reader["c_userrole"].ToString();
+
+                    _conn.Close();
+
+                    return true;
+                }
+                else
+                {
+                    
+                    _conn.Close();
+
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in Login method: {ex.Message}");
                 return false;
-             }            
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
-        finally
-        {
-            _conn.Close();
-        }
-        return false;
-    }
-
-    public bool Login(tbluser user)
-    {
-        try
-        {
-            _conn.Open();  
-            string query="SELECT * FROM t_muser WHERE c_emailid = @e And c_password=@p ";
-            var cmd = new NpgsqlCommand(query,_conn);
-            cmd.Parameters.AddWithValue("@e",user.c_emailid);
-            cmd.Parameters.AddWithValue("@p",user.c_password); 
-            var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                var role = reader["c_userrole"].ToString();
-                // var emailid = reader["c_emailid"].ToString();
-                // var username=reader["c_username"].ToString();
-                var session = _httpContextAccessor.HttpContext.Session;
-                session.SetString("c_userrole",role);
-                // session.SetString("emailid",emailid);
-                // session.SetString("username",username);
-                return true;
-            } 
-            else
-            {
-                return false;
             }
+            finally
+            {
+                // Close connection if it's open
+                if (_conn.State == ConnectionState.Open)
+                    _conn.Close();
+            }
+        }
 
-        }
-        catch (System.Exception)
-        {
-
-            throw;
-        }
-        finally
-        {
-            _conn.Close();
-        }
-    }
     }
 }
