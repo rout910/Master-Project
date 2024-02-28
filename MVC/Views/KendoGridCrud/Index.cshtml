@@ -1,10 +1,7 @@
-@model MVC.Models.tblemp
-@{
-    ViewData["Title"] = "Edit";
-}
-<h2></h2>
+@* @model List<MVC.Models.tblemp>
 <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css" />
-<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.default.min.css" />
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.metroblack.min.css" />
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js"></script>
 
@@ -16,26 +13,151 @@
             var dataSource = new kendo.data.DataSource({
                 transport: {
                     read: {
-                        url: "https://localhost:7028/KendoGridCrud/GetAll",
+                        url: "https://localhost:7028/kendogridcrud/getall",
                         dataType: "json"
                     },
                     create: {
-                        url: "https://localhost:7028/KendoGridCrud/add",
+                        url: "https://localhost:7028/kendogridcrud/add",
+                        type: "POST",
+                        dataType: "json"
+                    },
+                   update: {
+                    url: function(data) {
+                        return "https://localhost:7028/kendogridcrud/UpdateCity/" + data.c_empid;
+                    },
+                    type: "POST",
+                    dataType: "json"
+                },
+                destroy: {
+                    url: function(data) {
+                        return "https://localhost:7028/kendogridcrud/Delete?id=" + data.c_empid;
+                    },
+                    type: "POST",
+                    dataType: "json"
+                }
+
+                },
+                pageSize: 10,
+                schema: {
+                    model: {
+                        id: "c_empid",
+                        fields: {
+                            c_empid: { type: "number", editable: false, nullable: false },
+                            c_empname: { type: "string", editable: true, validation: { required: true } },
+                            c_gender: { type: "string", validation: { required: true } },
+                            c_dob: { type: "date", validation: { required: true } },
+                            c_shift: { type: "string", validation: { required: true } },
+                            c_depid: { type: "number", validation: { required: true } },
+                            c_empimage: { type: "string", validation: { required: true } }
+                        }
+                    }
+                }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                columns: [
+                    { field: "c_empid", title: "Employee ID" },
+                    { field: "c_empname", title: "Employee Name" },
+                    { field: "c_gender", title: "Gender" },
+                    { field: "c_dob", title: "Date of Birth", format: "{0:MM/dd/yyyy}" },
+                    { field: "c_shift", title: "Shift" },
+                    { field: "c_depid", title: "Department ID" },
+                    { field: "c_empimage", title: "Employee Image",
+                 
+
+
+                    editor: imageUploadEditor
+                     },
+                    { command: ["edit", "destroy"], title: "&nbsp;", width: "200px" }
+                ],
+                editable: "popup",
+                toolbar: ["create"],
+                pageable: true,
+                sortable: true,
+                filterable: true
+            });
+               function imageUploadEditor(container, options) {
+            $('<input type="file" id="temp_name" name="temp_name"  />')
+                .appendTo(container)
+                .kendoUpload({
+                    multiple: false,
+                    validation: {
+                        allowedExtensions: [".jpg", ".png", ".jpeg"]
+                    },
+                    select: imageNameChange
+                });
+
+            $('<input type="hidden" id="c_empimage" name="c_empimage" data-bind="value:c_empimage"  /> ').appendTo(container);
+        }
+         
+            function imageNameChange(e) { 
+            $.each(e.files, function (index, value) {
+                var formData = new FormData();
+                formData.append('file', value.rawFile, value.name);
+
+                $.ajax({
+                    url: '/KendoGridCrud/UploadImage', // Endpoint to handle image upload
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // Assuming the endpoint returns the URL where the image is stored
+                        var imageUrl = response.imageUrl;
+                        $("#c_empimage").val(imageUrl).change();
+                    },
+                    error: function (error) {
+                        console.error('Error uploading image:', error);
+                    }
+                });
+            });
+        }
+           
+            dataSource.bind("requestEnd", function (e) {
+                if (e.type === "create" || e.type === "update" || e.type === "destroy") {
+                    dataSource.read();
+                }
+            });
+
+            $("#grid").on("click", ".k-grid-cancel-changes", function () {
+                dataSource.cancelChanges();
+            });
+        });
+    </script>
+} *@
+
+@model List<MVC.Models.tblemp>
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.common.min.css" />
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2021.2.616/styles/kendo.metroblack.min.css" />
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2021.2.616/js/kendo.all.min.js"></script>
+
+<div id="grid"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "https://localhost:7028/kendogridcrud/getall",
+                        dataType: "json"
+                    },
+                    create: {
+                        url: "https://localhost:7028/kendogridcrud/add",
                         type: "POST",
                         dataType: "json"
                     },
                     update: {
-                        url: function (data) {
-                            return "" + data.id;
-                        },
-                        type: "POST",
+                        url: "https://localhost:7100/City/Edit",
+                        type: "PUT",
                         dataType: "json"
                     },
                     destroy: {
-                        url: function (data) {
-                            return "" + data.c_empid;
-                        },
-                        type: "POST",
+                        url: "https://localhost:7100/City/Delete",
+                        type: "DELETE",
                         dataType: "json"
                     }
                 },
@@ -45,11 +167,12 @@
                         id: "c_empid",
                         fields: {
                             c_empid: { type: "number", editable: false, nullable: false },
-                            c_empname: { type: "string", validation: { required: true } },
-                            c_gender: { type: "string" },
-                            c_shift: { type: "string" },
-                            c_empimage: { type: "string" },
-                            c_depid: { type: "number" }
+                            c_empname: { type: "string", editable: true, validation: { required: true } },
+                            c_gender: { type: "string", validation: { required: true } },
+                            c_dob: { type: "date", validation: { required: true } },
+                            c_shift: { type: "string", validation: { required: true } },
+                            c_depid: { type: "number", validation: { required: true } },
+                            c_empimage: { type: "string", validation: { required: true } }
                         }
                     }
                 }
@@ -58,36 +181,17 @@
             $("#grid").kendoGrid({
                 dataSource: dataSource,
                 columns: [
-                    { field: "c_empid", title: "Employee ID", width: 100 },
-                    { field: "c_empname", title: "Employee Name", width: 100 },
-                    { field: "c_gender", title: "Gender", width: 100,editor:genderDropDownEditor },
-                    { field: "c_shift", title: "Shift", width: 100,editor:hobbyCheckBoxEditor},
-                    { field: "c_empimage", title: "Image", width: 100,
-                       template: "<img src='/images/#= c_empimage #' alt='City Photo' style='max-width: 100px; max-height: 100px;'/>",
-                      editor: function (container, options) {
-                          var input = $("<input name='" + options.field + "' type='file' />").appendTo(container);
-                          input.change(function () {
-                              var formData = new FormData();
-                              formData.append("photo", input[0].files[0]);
-                              $.ajax({
-                                  url: "https://localhost:7028/KendoGridCrud/UploadPhoto",
-                                  type: "POST",
-                                  data: formData,
-                                  contentType: false,
-                                  processData: false,
-                                  success: function (response) {
-                                      options.model.set("c_empimage", response.filename);
-                                  },
-                                  error: function (xhr, status, error) {
-                                      console.error("Error uploading photo:", error);
-                                  }
-                              });
-                          });
-                      }
-                    },
-                    {
-                        field: "c_depid", title: "Department ID", width: 100,editor: deptDropDownEditor },
-                    { command: ["edit", "destroy"], title: "&nbsp;", width: 200 }
+                    { field: "c_empid", title: "Employee ID" },
+                    { field: "c_empname", title: "Employee Name" },
+                    { field: "c_gender", title: "Gender",editor:genderDropDownEditor, },
+                    { field: "c_dob", title: "Date of Birth", format: "{0:MM/dd/yyyy}",editor:dateOfBirthEditor, },
+                    { field: "c_shift", title: "Shift",editor:hobbyCheckBoxEditor, },
+                    { field: "c_depid", title: "Department ID",editor:deptDropDownEditor, },
+                    { field: "c_empimage", title: "Employee Image",
+                    template: "<img src='#: c_empimage #' alt='City Photo' style='width: 50px; height: 50px;' />",
+                    editor: imageUploadEditor
+                     },
+                    { command: ["edit", "destroy"], title: "&nbsp;", width: "200px" }
                 ],
                 editable: "popup",
                 toolbar: ["create"],
@@ -95,6 +199,119 @@
                 sortable: true,
                 filterable: true
             });
+               function imageUploadEditor(container, options) {
+            $('<input type="file" id="temp_name" name="temp_name"  />')
+                .appendTo(container)
+                .kendoUpload({
+                    multiple: false,
+                    validation: {
+                        allowedExtensions: [".jpg", ".png", ".jpeg"]
+                    },
+                    select: imageNameChange
+                });
+
+            $('<input type="hidden" id="c_empimage" name="c_empimage" data-bind="value:c_empimage"  /> ').appendTo(container);
+        }
+          function imageNameChange(e) { 
+    $.each(e.files, function (index, value) {
+        var formData = new FormData();
+        formData.append('file', value.rawFile, value.name);
+
+        $.ajax({
+            url: '/KendoGridCrud/UploadImage', // Endpoint to handle image upload
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                // Assuming the endpoint returns the URL where the image is stored
+                var imageUrl = response.imageUrl;
+                $("#c_empimage").val(imageUrl).change();
+            },
+            error: function (error) {
+                console.error('Error uploading image:', error);
+            }
+        });
+    });
+}
+
+
+    function deptDropDownEditor(container, options) {
+        $('<input required name="' + options.field + '"/>')
+            .appendTo(container)
+            .kendoDropDownList({
+                autoBind: false,
+                dataTextField: "c_dename",
+                dataValueField: "c_depid",
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "https://localhost:7028/kendogridcrud/FetchStates",
+                            dataType: "json"
+                        }
+                    }
+                }
+            });
+    }
+
+    function genderDropDownEditor(container, options) {
+        $('<label><input type="radio" name="' + options.field + '" value="Male"> Male</label>' +
+            '<label><input type="radio" name="' + options.field + '" value="Female"> Female</label>')
+            .appendTo(container);
+    }
+
+    function hobbyCheckBoxEditor(container, options) {
+    // Create checkboxes for city facility selection
+    var metroCheckbox = $('<input type="checkbox" name="M' + options.field + '" value="Metro">M</input>').appendTo(container);
+    var airportCheckbox = $('<input type="checkbox" name="A' + options.field + '" value="Airport">A</input>').appendTo(container);
+
+    // Check checkboxes based on city's facilities
+    var cityFacilities = options.model.c_shift.split(',');
+    if (cityFacilities.includes('M')) {
+        metroCheckbox.prop('checked', true);
+    }
+    if (cityFacilities.includes('A')) {
+        airportCheckbox.prop('checked', true);
+    }
+
+    // Update city's facility when checkboxes change
+    metroCheckbox.change(function () {
+        updateCityFacility();
+    });
+    airportCheckbox.change(function () {
+        updateCityFacility();
+    });
+
+    function updateCityFacility() {
+        var facilities = [];
+        if (metroCheckbox.is(':checked')) {
+            facilities.push('M');
+        }
+        if (airportCheckbox.is(':checked')) {
+            facilities.push('A');
+        }
+        options.model.c_shift = facilities.join(',');
+    }
+}
+
+
+   function dateOfBirthEditor(container, options) {
+    // Get the current value of the field
+    var currentValue = options.model[options.field];
+    
+    // Create the date picker input element
+    var datePicker = $('<input name="' + options.field + '">')
+        .appendTo(container)
+        .kendoDatePicker({
+            format: "MM/dd/yyyy",
+            value: currentValue // Set the initial value to the current value of the field
+        });
+    
+    // Bind change event to update the model when the value changes
+    datePicker.change(function() {
+        options.model.set(options.field, this.value());
+    });
+}
 
             dataSource.bind("requestEnd", function (e) {
                 if (e.type === "create" || e.type === "update" || e.type === "destroy") {
@@ -106,40 +323,5 @@
                 dataSource.cancelChanges();
             });
         });
-
-         function deptDropDownEditor(container, options) {
-        $('<input required name="' + options.field + '"/>')
-            .appendTo(container)
-            .kendoDropDownList({
-                autoBind: false,
-                dataTextField: "c_dename",
-                dataValueField: "c_depid",
-                dataSource: {
-                    transport: {
-                        read: {
-                            url: "https://localhost:7028/KendoGridCrud/FetchStates",
-                            dataType: "json"
-                        }
-                    }
-                }
-            });
-    }
-    function genderDropDownEditor(container, options) {
-        $('<label><input type="radio" name="' + options.field + '" value="Male"> Male</label>' +
-            '<label><input type="radio" name="' + options.field + '" value="Female"> Female</label>')
-            .appendTo(container);
-    }
-
-    function hobbyCheckBoxEditor(container, options) {
-        var hobbies = ["M", "A"];
-        var dataItem = options.model;
-        for (var i = 0; i < hobbies.length; i++) {
-            var checkbox = $('<input type="checkbox" name="' + options.field + '" value="' + hobbies[i] + '"> ' + hobbies[i] + '<br/>');
-            if (dataItem.hobby && dataItem.hobby.indexOf(hobbies[i]) !== -1) {
-                checkbox.prop('checked', true);
-            }
-            checkbox.appendTo(container);
-        }
-    }
     </script>
 }
