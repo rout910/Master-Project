@@ -82,7 +82,7 @@ public IActionResult UploadImage(IFormFile file)
             file.CopyTo(fileStream);
         }
 
-        var imageUrl = "/images/" + file.FileName; // Assuming your image URL is relative
+        var imageUrl = file.FileName; // Assuming your image URL is relative
         img = imageUrl;
         return Json(new { imageUrl });
     }

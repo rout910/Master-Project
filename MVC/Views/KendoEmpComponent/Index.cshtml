@@ -107,7 +107,7 @@
                     <td>@item.c_dob.ToString("MM/dd/yyyy")</td>
                     <td>@item.c_shift</td>
                     <td>@item.c_depid</td>
-                    <td>@item.c_empimage</td>
+                    <td><img src="~/images/@item.c_empimage" alt="Item Image" width="100" /></td>
                     <td class="action-buttons">
                         <!-- Update and Delete buttons for each row -->
                         <button class="updateEmployee" data-id="@item.c_empid">Update</button>
@@ -122,7 +122,6 @@
     <script>
     $(document).ready(function () {
         $("#btnAddEmployee").click(function () {
-            // Open the Kendo Window
             $("#addEmployeeWindow").kendoWindow({
                 title: "Add Employee",
                 width: "500px",
@@ -145,42 +144,73 @@
                     </div>
                     <div>
                         Shift: <br />
-                        <input type="checkbox" id="morningShift" name="c_morningShift" value="Morning">
+                        <input type="checkbox" id="c_shift" name="c_shift" value="Morning">
                         <label for="morningShift">Morning</label>
-                        <input type="checkbox" id="nightShift" name="c_nightShift" value="Night">
+                        <input type="checkbox" id="c_shift" name="c_shift" value="Night">
                         <label for="nightShift">Night</label>
                     </div>
                     <div>
                         <label for="c_depid">Department:</label>
-                        <input id="department" />
+                        <select id="c_depid" name="c_depid" ></select>
                     </div>
                     <div>
-                        <label for="c_empimage">Employee Image:</label>
-                        <input type="file" id="c_empimage" name="c_empimage" accept="image/*" />
+                        <label for="c_dob">Date of Joining:</label>
+                        <input type="date" id="c_dob" name="c_dob">
                     </div>
-                    <button type="submit">Save</button>
+                    <div>
+                        <label for="ImageFile">Employee Image:</label>
+                        <input type="file" id="ImageFile" name="file" ><br />
+                    </div>
+                    <button type="button" id="submitForm">Save</button>
                 </form>
             `);
 
-            // Initialize the Kendo DropDownList for departments
-            $("#department").kendoDropDownList({
+            $("#c_depid").kendoDropDownList({
                 optionLabel: "Select Department",
                 dataTextField: "c_dename",
                 dataValueField: "c_depid",
                 dataSource: {
                     transport: {
                         read: {
-                            url: "https://localhost:7028/kendoempcomponent/getdeptname", // Endpoint to fetch departments
-                            dataType: "json"
+                            url: "https://localhost:7028/kendoempcomponent/getdeptname",
+                            dataType: "json",
+                            
                         }
                     }
                 }
             });
+            $("#ImageFile").kendoUpload({
+    async: {
+        saveUrl: "https://localhost:7028/kendoempcomponent/uploadimage",
+        autoUpload: true
+    },
+    upload: function (e) {
+        // You can add additional logic here if needed
+        console.log("Upload initiated...");
+    },
+    success: function (e) {
+        // Handle success response
+        console.log("Upload successful...");
+        console.log(e.response); // Response from the server, if any
+    },
+    error: function (e) {
+        // Handle error
+        console.error("Upload failed...");
+        console.log(e);
+    }
+});            
+
+            
+
+            // Handle form submission
             $("#submitForm").click(function () {
+                
+                var formData = new FormData($("#addEmployeeForm")[0]);
+
                 $.ajax({
-                    url: "URL_TO_SUBMIT_FORM_DATA_TO",
+                    url: "https://localhost:7028/kendoempcomponent/create",
                     type: "POST",
-                    data: new FormData($("#addEmployeeForm")[0]),
+                    data: formData,
                     processData: false,
                     contentType: false,
                     success: function (response) {
@@ -192,6 +222,7 @@
                         console.log(error);
                     }
                 });
+            });
         });
     });
 </script>
