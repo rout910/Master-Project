@@ -151,15 +151,19 @@
                         dataType: "json"
                     },
                     update: {
-                        url: "https://localhost:7100/City/Edit",
-                        type: "PUT",
-                        dataType: "json"
-                    },
-                    destroy: {
-                        url: "https://localhost:7100/City/Delete",
-                        type: "DELETE",
-                        dataType: "json"
-                    }
+                      url: function(data) {
+                          return "https://localhost:7028/kendogridcrud/UpdateCity/" + data.c_empid;
+                      },
+                      type: "POST",
+                      dataType: "json"
+                  },
+                  destroy: {
+                      url: function(data) {
+                          return "https://localhost:7028/kendogridcrud/Delete?id=" + data.c_empid;
+                      },
+                      type: "POST",
+                      dataType: "json"
+                  }
                 },
                 pageSize: 10,
                 schema: {
@@ -295,23 +299,13 @@
 }
 
 
-   function dateOfBirthEditor(container, options) {
-    // Get the current value of the field
-    var currentValue = options.model[options.field];
-    
-    // Create the date picker input element
-    var datePicker = $('<input name="' + options.field + '">')
-        .appendTo(container)
-        .kendoDatePicker({
-            format: "MM/dd/yyyy",
-            value: currentValue // Set the initial value to the current value of the field
-        });
-    
-    // Bind change event to update the model when the value changes
-    datePicker.change(function() {
-        options.model.set(options.field, this.value());
-    });
-}
+    function dateOfBirthEditor(container, options) {
+        $('<input name="' + options.field + '" required data-bind="value:' + options.field + '">')
+            .appendTo(container)
+            .kendoDatePicker({
+                format: "MM/dd/yyyy"
+            });
+    }
 
             dataSource.bind("requestEnd", function (e) {
                 if (e.type === "create" || e.type === "update" || e.type === "destroy") {
