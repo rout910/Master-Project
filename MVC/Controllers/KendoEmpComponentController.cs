@@ -66,7 +66,7 @@ public class KendoEmpComponentController : Controller
         
       
     
-    return Json("abc");
+   
     }
 
     [HttpPost]
@@ -88,24 +88,41 @@ public IActionResult UploadImage(IFormFile file)
     }
     return Json(new { error = "No file uploaded or file is empty." });
 }
+
+[HttpGet]
+public IActionResult GetEmployee(int id)
+{
+     var departments = _empRepo.GetDept();
+     ViewBag.Dept = departments;
+    var emp = _empRepo.GetOne(id);
+    return View(emp);
+}
+
+[HttpGet]
+public IActionResult Update(int id)
+{
+    var emp = _empRepo.GetOne(id);
+    return View(emp);   
+}
     
 
-    [HttpPut]
-    public IActionResult Update(int id, [FromBody] tblemp emp)
+    [HttpPost]
+    public IActionResult Update(tblemp emp)
     {
         if (ModelState.IsValid)
         {
             _empRepo.Update(emp);
-            return Json(emp);
+            return RedirectToAction("Index"); 
+            
         }
-        return BadRequest(ModelState);
+        return View(emp);
     }
 
     [HttpDelete]
     public IActionResult Delete(int id)
     {
         _empRepo.Delete(id);
-        return Ok();
+        return RedirectToAction("Index");
     }
 
     public IActionResult Privacy()

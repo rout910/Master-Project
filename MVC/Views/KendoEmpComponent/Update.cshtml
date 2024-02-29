@@ -1,0 +1,101 @@
+@model MVC.Models.tblemp
+
+@{
+    ViewData["Title"] = "Update Employee";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="employeeForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="c_empname" class="k-textbox" value="@Model.c_empname" /><br>
+
+    <label for="gender">Gender:</label>
+    <input type="radio" id="male" name="c_gender" value="Male" class="k-radio" checked="@Model.c_gender == 'Male'" />
+    <label for="male" class="k-radio-label">Male</label>
+    <input type="radio" id="female" name="c_gender" value="Female" class="k-radio" checked="@Model.c_gender == 'Female'" />
+    <label for="female" class="k-radio-label">Female</label>
+
+    <div>
+        Shift:
+        <input type="checkbox" id="c_shiftMorning" name="c_shift" value="Morning" class="k-checkbox" @(Model.c_shift.Contains("Morning") ? "checked" : "") />
+        <label for="morningShift" class="k-checkbox-label">Morning</label>
+        <input type="checkbox" id="c_shiftNight" name="c_shift" value="Night" class="k-checkbox" @(Model.c_shift.Contains("Night") ? "checked" : "") />
+        <label for="nightShift" class="k-checkbox-label">Night</label>
+    </div>
+    <div>
+        <label for="c_depid">Department:</label>
+        <select id="c_depid" name="c_depid" ></select>
+        
+    </div>
+    <div>
+        <label for="c_dob">Date of Joining:</label>
+        <input type="date" id="c_dob" name="c_dob" class="k-datepicker" style="width: 100%;" value="@Model.c_dob.ToString("yyyy-MM-dd")" />
+    </div>
+    <div>
+        <label for="ImageFile">Employee Image:</label>
+        <input type="file" id="ImageFile" name="file" class="k-upload"/><br />
+    </div>
+
+    <button type="button" id="saveButton" class="k-button k-primary">Update</button>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#c_depid").kendoDropDownList({
+                optionLabel: "Select Department",
+                dataTextField: "c_dename",
+                dataValueField: "c_depid",
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "https://localhost:7028/kendoempcomponent/GetDeptName",
+                            dataType: "json",
+                        }
+                    }
+                }
+            });
+
+            $("#c_dob").kendoDatePicker();
+
+
+            $("#ImageFile").kendoUpload({
+                async: {
+                    saveUrl: "https://localhost:7028/kendoempcomponent/uploadimage",
+                    autoUpload: true
+                },
+                upload: function (e) {
+                    console.log("Upload initiated...");
+                },
+                success: function (e) {
+                    console.log("Upload successful...");
+                    console.log(e.response);
+                },
+
+                error: function (e) {
+                    console.error("Upload failed...");
+                    console.log(e);
+                }
+                
+            });
+
+            $("#saveButton").click(function () {
+                var formData = new FormData($("#employeeForm")[0]);
+                $.ajax({
+                    url: "https://localhost:7028/kendoempcomponent/update",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+}
