@@ -28,7 +28,7 @@ namespace WEBAPI.Controllers
         }
 
         [HttpPost("Add")]
-        public IActionResult Add([FromBody] tblemp emp)
+        public IActionResult Add([FromForm] tblemp emp)
         {
             _repo.Insert(emp);
             return Ok(new { success = true });
@@ -42,7 +42,7 @@ namespace WEBAPI.Controllers
         }
 
         [HttpPost("UpdateCity")]
-        public IActionResult UpdateCity([FromBody] tblemp city)
+        public IActionResult UpdateCity([FromForm] tblemp city)
         {
             _repo.Update(city);
             return Ok(new { success = true });
@@ -55,24 +55,5 @@ namespace WEBAPI.Controllers
             _repo.Delete(id);
             return Ok(new { success = true, message = "City deleted." });
         }
-
-        // [HttpPost("UploadImage")]
-        // public IActionResult UploadImage([FromForm] IFormFile file)
-        // {
-        //     if (file != null && file.Length > 0)
-        //     {
-        //         var uploads = Path.Combine(_environment.WebRootPath, "images"); // Assuming you have a folder named 'images' in wwwroot
-        //         var filePath = Path.Combine(uploads, file.FileName);
-
-        //         using (var fileStream = new FileStream(filePath, FileMode.Create))
-        //         {
-        //             file.CopyTo(fileStream);
-        //         }
-
-        //         var imageUrl = "/images/" + file.FileName; // Assuming your image URL is relative
-        //         return Ok(new { imageUrl });
-        //     }
-        //     return BadRequest(new { error = "No file uploaded or file is empty." });
-        // }
     }
 }
