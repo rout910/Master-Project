@@ -43,23 +43,36 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $("#c_depid").kendoDropDownList({
-                optionLabel: "Select Department",
-                dataTextField: "c_dename",
-                dataValueField: "c_depid",
-                dataSource: {
-                    transport: {
-                        read: {
-                            url: "https://localhost:7028/kendoempcomponent/GetDeptName",
-                            dataType: "json",
-                        }
-                    }
-                }
+            // Fetch departments and set the selected value
+           $.ajax({
+        url: "https://localhost:7028/kendoempcomponent/GetDeptName",
+        type: "GET",
+        success: function (data) {
+            var departments = data;
+            var $dropdown = $("#c_depid");
+            
+            // Clear existing options
+            $dropdown.empty();
+
+            // Add option for each department
+            $.each(departments, function (index, department) {
+                $dropdown.append($("<option></option>")
+                    .attr("value", department.c_depid)
+                    .text(department.c_dename));
             });
 
+            // Set selected value
+            $dropdown.val("@Model.c_depid");
+        },
+        error: function (xhr, status, error) {
+            console.log(error);
+        }
+    });
+
+            // Initialize the date picker
             $("#c_dob").kendoDatePicker();
 
-
+            // Initialize the upload widget (image input)
             $("#ImageFile").kendoUpload({
                 async: {
                     saveUrl: "https://localhost:7028/kendoempcomponent/uploadimage",
@@ -72,14 +85,13 @@
                     console.log("Upload successful...");
                     console.log(e.response);
                 },
-
                 error: function (e) {
                     console.error("Upload failed...");
                     console.log(e);
                 }
-                
             });
 
+            // Handle the click event of the save button
             $("#saveButton").click(function () {
                 var formData = new FormData($("#employeeForm")[0]);
                 $.ajax({
@@ -90,6 +102,7 @@
                     contentType: false,
                     success: function (response) {
                         console.log(response);
+                         window.location.href = "https://localhost:7028/kendoempcomponent/Index";
                     },
                     error: function (xhr, status, error) {
                         console.log(error);
