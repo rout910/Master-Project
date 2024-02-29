@@ -3,18 +3,14 @@
     @* Layout = "~/Views/Shared/_ProducttLayout.cshtml"; *@
 }
 
-
 <h2>Update</h2>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"
-    integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+        integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ=="
+        crossorigin="anonymous" ></script>
 
 <script>
     $(document).ready(function () {
-      //  LoadDepartment();
         if (@ViewBag.c_empid > 0) {
             LoadOneProduct();
         }
@@ -22,88 +18,63 @@
 
     function LoadOneProduct() {
         var settings = {
-            "url": "https://localhost:7123/api/CrudApi/" + @ViewBag.c_empid,
+            "url": "https://localhost:7123/api/CrudApi/@ViewBag.c_empid",
             "method": "GET",
             "timeout": 0,
-            "headers": { "Authorization": 'Bearer ' + localStorage.getItem('token') }
+            "headers": {"Authorization": 'Bearer ' + localStorage.getItem('token')}
         };
 
-        $.ajax(settings).done(function (response) {
-            $("#c_empname").val(response.c_empname);
-            $("input[name='c_gender'][value='" + response.c_gender + "']").prop("checked", true);
+        $.ajax(settings)
+            .done(function (response) {
+                $("#c_empname").val(response.c_empname);
+                $("input[name='c_gender'][value='" + response.c_gender + "']").prop("checked", true);
 
-            // Checkbox logic
-            var Shifts = response.c_shift.split(", ");
-            Shifts.forEach(function (c_shift) {
-                $("input[name='c_shift'][value='" + c_shift + "']").prop("checked", true);
+                // Checkbox logic
+                var Shifts = response.c_shift.split(", ");
+                Shifts.forEach(function (c_shift) {
+                    $("input[name='c_shift'][value='" + c_shift + "']").prop("checked", true);
+                });
+                // End of checkbox logic
+
+                $("#c_depid").val(response.c_depid);
+                $("#c_dob").val(response.c_dob.split('T')[0]);
+                //$("#c_empimage").val(response.c_empimage);
+            })
+            .fail(function (xhr, status, error) {
+                console.error("Error loading product:", error);
             });
-            // End of checkbox logic
-
-            $("#c_depid").val(response.c_depid);
-            $("#c_dob").val(response.c_dob);
-            $("#c_empimage").val(response.c_empimage);
-
-        });
     }
-    @* function LoadDepartment() {
-        var settings = {
-            "url": "https://localhost:7123/api/CrudApi/GetAllDepartment",
-            "method": "GET",
-            "timeout": 0
-        };
-        $.ajax(settings).done(function (response) {
-
-            $.each(response, function (Update, department) {
-                $('#c_depid').append($('<option>', {
-                    value: department.c_depid,
-                    text: department.c_dename
-                }));
-            });
-
-        });
-    } *@
 
     function UpdateProduct() {
-        var addProduct = {
-           // c_empid: $("#c_empid").val(),
-            c_empname: $("#c_empname").val(),
-            c_gender: $("input[name='c_gender']:checked").val(),
-            c_shift: $("input[name='c_shift']:checked").map(function () { return $(this).val(); }).get(), // Get array of checked checkbox values
-            c_depid: $("#c_depid").val(),
-            c_dob: $("#c_dob").val(),
-            c_empimage: $("#c_empimage").val()
-            // Include additional fields if needed
-        };
-
-        var updateProduct = {
-            c_empid: $("#c_empid").val(),
-            c_empname: $("#c_empname").val(),
-            c_gender: $("input[name='c_gender']:checked").val(),
-            c_shift: $("input[name='c_shift']:checked").map(function () { return $(this).val(); }).get(), // Get array of checked checkbox values
-            c_depid: $("#c_depid").val(),
-            c_dob: $("#c_dob").val(),
-            c_empimage: $("#c_empimage").val()
-            // Include additional fields if needed
-        };
+        var formData = new FormData();
+        @* formData.append("c_empid", $("#c_empid").val()); *@
+        formData.append("c_empname", $("#c_empname").val());
+        formData.append("c_gender", $("input[name='c_gender']:checked").val());
+        formData.append("c_shift", $("input[name='c_shift']:checked").map(function () {
+            return $(this).val();
+        }).get());
+        formData.append("c_depid", $("#c_depid").val());
+        formData.append("c_dob", $("#c_dob").val());
+        formData.append("c_empimage", $("#c_empimage").val()); // Append file
 
         var settings = {
-            "method": "POST",
             "timeout": 0,
             "headers": {
-                "Content-Type": "application/json",
                 "Authorization": 'Bearer ' + localStorage.getItem('token')
-            }
+            },
+            "processData": false,
+            "contentType": false,
+            "data": formData
         };
 
         if (@ViewBag.c_empid == 0) {
-            settings.url = "https://localhost:7123/api/CrudApi/Insert";
-            settings.method = "POST"; // Add forward slash
-            settings.data = JSON.stringify(addProduct);
+            settings.url = "https://localhost:7123/api/CrudApi/Insert"; // Change the URL for POST request
+            settings.method = "POST";
         } else {
-            settings.url = "https://localhost:7123/api/CrudApi/";
+            settings.url = "https://localhost:7123/api/CrudApi/" + @ViewBag.c_empid; // Include the ID for PUT request
             settings.method = "PUT";
-            settings.data = JSON.stringify(updateProduct);
         }
+
 
         $.ajax(settings)
             .done(function (response) {
@@ -111,23 +82,22 @@
                 console.log("Redirection to /MVCCrudApi/Index...");
                 window.location = "/MVCCrudApi/Index";
             })
-
-
+            .fail(function (xhr, status, error) {
+                console.error("Error updating product:", error);
+            });
     }
 </script>
 
 <div class="form-horizontal">
     <div class="form-group">
         <div>
-            <label type="" name="c_empid" id="c_empid"> id: @ViewBag.c_empid</label>
+            <label type="hidden" name="c_empid" id="c_empid"> id: @ViewBag.c_empid</label>
         </div>
-
 
         <div class="form-group">
             <label for="c_empname">Name</label>
-            <input type="text" name="c_empname" id="c_empname" class="form-control" />
+            <input type="text" name="c_empname" id="c_empname" class="form-control"/>
         </div>
-
 
         <div class="form-group">
             <label>Gender</label>
@@ -141,20 +111,17 @@
             </div>
         </div>
 
-
-
         <div class="form-group">
             <label for="c_shift">Shift</label><br>
             <label for="c_shift">Morning</label>
-            <input type="checkbox" name="c_shift" id="c_shift" value="Morning" /><br>
+            <input type="checkbox" name="c_shift" id="c_shift" value="Morning"/><br>
             <label for="c_shift">Afternoon</label>
-            <input type="checkbox" name="c_shift" id="c_shift" value="Afternoon" /><br>
-
+            <input type="checkbox" name="c_shift" id="c_shift" value="Afternoon"/><br>
         </div>
 
-
-        <div class="mb-3">
+        @* <div class="mb-3">
             <label for="c_depid" class="form-label">Department</label>
+            <input type="text" name="c_depid" id="c_depid" />
             <select class="form-select" id="c_depid" name="c_depid" required>
                 <option value="">Select Department</option>
                 @foreach (var department in ViewBag.Departments)
@@ -162,19 +129,26 @@
                     <option value="@department.c_depid">@department.c_dename</option>
                 }
             </select>
-        </div>
+        </div> *@
+        <div class="mb-3">
+    <label for="c_depid" class="form-label">Department</label>
+    <select class="form-select" id="c_depid" name="c_depid" required>
+        <option value="">Select Department</option>
+        <option value="1">HR</option>
+        <option value="2">CEO</option>
+    </select>
+</div>
+
 
         <div class="form-group">
             <label for="c_dob">Date</label>
-            <input type="date" name="c_dob" id="c_dob" class="form-control" />
+            <input type="date" name="c_dob" id="c_dob" class="form-control"/>
         </div>
 
         <div class="form-group">
             <label for="c_empimage">Image</label>
-            <input type="file" name="c_empimage" id="c_empimage" class="form-control" />
+            <input type="file" name="c_empimage" id="c_empimage" class="form-control"/>
         </div>
-
-
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">

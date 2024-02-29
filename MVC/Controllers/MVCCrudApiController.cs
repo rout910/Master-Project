@@ -28,6 +28,7 @@ namespace MVC.Controllers
         [Route("Index")]
         public IActionResult Index()
         {
+            
             return View();
         }
 
@@ -40,14 +41,9 @@ namespace MVC.Controllers
             ViewBag.Title = "Update";
             var department = _emp.GetDept();
             ViewBag.Departments = department;
-            return View(id);
+             return View(id);
           
-
-            
         }
-
-
-
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
