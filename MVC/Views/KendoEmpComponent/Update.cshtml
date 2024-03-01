@@ -25,7 +25,9 @@
     </div>
     <div>
         <label for="c_depid">Department:</label>
-        <select id="c_depid" name="c_depid" ></select>
+        
+            <select id="departmentList" name="c_depid"></select><br>
+        
         
     </div>
     <div>
@@ -35,74 +37,60 @@
     <div>
         <label for="ImageFile">Employee Image:</label>
         <input type="file" id="ImageFile" name="file" class="k-upload"/><br />
+        @if (!string.IsNullOrEmpty(Model.c_empimage))
+        {
+            <img src="@Url.Content("~/images/" + Model.c_empimage)" alt="Employee Image" style="max-width: 200px;" />
+        }
+    </div>
     </div>
 
-    <button type="button" id="saveButton" class="k-button k-primary">Update</button>
+    <button type="button" id="saveButton" name="saveButton" class="k-button k-primary">Update</button>
 </form>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 @section Scripts {
     <script>
         $(document).ready(function () {
             // Fetch departments and set the selected value
-           $.ajax({
-        url: "https://localhost:7028/kendoempcomponent/GetDeptName",
-        type: "GET",
-        success: function (data) {
-            var departments = data;
-            var $dropdown = $("#c_depid");
+            $.ajax({
+                url: "https://localhost:7028/kendoempcomponent/GetDeptName",
+                type: "GET",
+                success: function (data) {
+                    var departments = data;
+                    var $dropdown = $("#departmentList");
             
-            // Clear existing options
-            $dropdown.empty();
+                    // Clear existing options
+                    $dropdown.empty();
 
-            // Add option for each department
-            $.each(departments, function (index, department) {
-                $dropdown.append($("<option></option>")
-                    .attr("value", department.c_depid)
-                    .text(department.c_dename));
-            });
+                    // Add option for each department
+                    $.each(departments, function (index, department) {
+                        $dropdown.append($("<option></option>")
+                            .attr("value", department.c_depid)
+                            .text(department.c_dename));
+                    });
 
-            // Set selected value
-            $dropdown.val("@Model.c_depid");
-        },
-        error: function (xhr, status, error) {
-            console.log(error);
-        }
-    });
-
-            // Initialize the date picker
-            $("#c_dob").kendoDatePicker();
-
-            // Initialize the upload widget (image input)
-            $("#ImageFile").kendoUpload({
-                async: {
-                    saveUrl: "https://localhost:7028/kendoempcomponent/uploadimage",
-                    autoUpload: true
+                    // Set selected value
+                    $dropdown.val("@Model.c_depid");
                 },
-                upload: function (e) {
-                    console.log("Upload initiated...");
-                },
-                success: function (e) {
-                    console.log("Upload successful...");
-                    console.log(e.response);
-                },
-                error: function (e) {
-                    console.error("Upload failed...");
-                    console.log(e);
+                error: function (xhr, status, error) {
+                    console.log(error);
                 }
             });
+
+            // Initialize the date picker
+            //$("#c_dob").kendoDatePicker();
 
             // Handle the click event of the save button
             $("#saveButton").click(function () {
                 var formData = new FormData($("#employeeForm")[0]);
                 $.ajax({
-                    url: "https://localhost:7028/kendoempcomponent/update",
+                    url: "https://localhost:7028/kendoempcomponent/update/" ,
                     type: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function (response) {
                         console.log(response);
-                         window.location.href = "https://localhost:7028/kendoempcomponent/Index";
+                        window.location.href = "https://localhost:7028/kendoempcomponent/Index";
                     },
                     error: function (xhr, status, error) {
                         console.log(error);

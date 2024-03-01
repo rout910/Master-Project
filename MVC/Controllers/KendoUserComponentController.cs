@@ -37,7 +37,7 @@ namespace MVC.Controllers
         public IActionResult Insert(tbluser user)
         {
             _userRepo.Register(user);
-            return RedirectToAction("Login","KendoUserComponent");
+            return RedirectToAction("Login", "KendoUserComponent");
 
         }
 
@@ -48,27 +48,28 @@ namespace MVC.Controllers
         }
 
         [HttpPost]
-public IActionResult Login(tbluser user)
-{
-    if(_userRepo.Login(user))
-    {
-        if(HttpContext.Session.GetString("c_userrole")=="Admin")
+        public IActionResult Login(tbluser user)
         {
-            return RedirectToAction("Index", "KendoUserComponent");
-        
-        }
-        else
-        {
-            return RedirectToAction("Index", "Home");
-        
-            }
-    }
-    else{
-        return View();
-    }
-}
+            if (_userRepo.Login(user))
+            {
+                if (HttpContext.Session.GetString("c_userrole") == "Admin")
+                {
+                    return RedirectToAction("Index", "KendoEmpComponent");
 
-       
+                }
+                else
+                {
+                    return RedirectToAction("Create", "KendoEmpComponent");
+
+                }
+            }
+            else
+            {
+                return View();
+            }
+        }
+
+
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
