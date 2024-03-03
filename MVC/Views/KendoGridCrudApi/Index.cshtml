@@ -59,7 +59,25 @@
                     { field: "c_empid", title: "Employee ID" },
                     { field: "c_empname", title: "Employee Name" },
                     { field: "c_gender", title: "Gender",editor:genderDropDownEditor, },
-                    { field: "c_dob", title: "Date of Birth", },
+                     {field: "c_dob",
+            title: "DOB",
+            editor: function (container, options) {
+                $(container).kendoCalendar({
+                    format: "yyyy/MM/dd",
+                    change: function () {
+                        console.log("Change :: " + kendo.toString(this.value(), 'yyyy/MM/dd'));
+                        options.model.set("c_dob",kendo.toString(this.value(), 'yyyy/MM/dd'));
+                    },
+                    navigate: function () {
+                        console.log("Navigate");
+                    }
+                }).data("kendoCalendar");
+            },
+            template: function (dataItem) {
+                var dob = kendo.toString(kendo.parseDate(dataItem.c_dob), "yyyy-MM-dd");
+                return dob;
+            }
+            },
                     { field: "c_shift", title: "Shift",
                     editor: function (container, options) {
                             var checkboxWrapper = $('<div>').appendTo(container);
