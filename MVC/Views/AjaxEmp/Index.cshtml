@@ -1,0 +1,249 @@
+@model IEnumerable<MVC.Models.tblemp>
+@{
+    ViewBag.Title = "Employee";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Employee</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Add your custom styles here */
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="mt-4">Employee Management</h2>
+
+        <!-- Display Area -->
+        <div class="mt-4">
+            <table id="employeeTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Employee Name</th>
+                        <th>Gender</th>
+                        <th>Date of Birth</th>
+                        <th>Shift</th>
+                        <th>Department ID</th>
+                        <th>Employee Image</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var employee in Model)
+                    {
+                        <tr>
+                            <td>@employee.c_empid</td>
+                            <td>@employee.c_empname</td>
+                            <td>@employee.c_gender</td>
+                            <td>@employee.c_dob.ToString("yyyy-MM-dd")</td>
+                            <td>@employee.c_shift</td>
+                            <td>@employee.c_depid</td>
+                            <td>@employee.c_empimage</td>
+                            <td>
+                                <button class="btn btn-primary edit-button"
+                                    onclick="editEmployee('@employee.c_empid')">Edit</button>
+                                <button class="btn btn-danger delete-button"
+                                    onclick="deleteEmployee('@employee.c_empid')">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Insert Form -->
+        <div class="mt-4">
+            <form id="addEmpForm">
+                <h3>Create Employee</h3>
+                <div class="form-group">
+                    <label for="c_empname">Employee Name:</label>
+                    <input type="text" class="form-control" id="c_empname" required>
+                </div>
+                <div class="form-group">
+                    <label>Gender :</label><br>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="male" value="Male" name="c_gender" class="form-check-input">
+                        <label for="male" class="form-check-label">Male</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="female" value="Female" name="c_gender" class="form-check-input">
+                        <label for="female" class="form-check-label">Female</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="radio" id="other" value="Other" name="c_gender" class="form-check-input">
+                        <label for="other" class="form-check-label">Other</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth:</label>
+                    <input type="date" class="form-control" id="c_dob" required>
+                </div>
+                <div class="form-group">
+                    <label>Shift</label><br>
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" id="morning" value="Morning" name="c_shift" class="form-check-input">
+                        <label for="morning" class="form-check-label">Morning</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" id="afternoon" value="Afternoon" name="c_shift" class="form-check-input">
+                        <label for="afternoon" class="form-check-label">Afternoon</label>
+                    </div>
+                </div>
+                 <div class="form-group"> 
+
+                     <label>Department ID</label>
+                    <select class="form-control" id="c_depid" name="c_dename" for="c_dename">
+                        <option value="">Select Department</option>
+                        @foreach (var emp in Model)
+                        {
+                            <option value="@emp.c_depid">@emp.c_depid</option>
+                          
+                
+                        }
+                    </select>
+                   @* <span asp-validation-for="c_depid" class="text-danger"></span>  *@
+
+
+                </div>
+                <div class="form-group">
+                    <label for="fileInput">Employee Image</label><br>
+                    <input type="file" id="imgFile" class="form-control" />
+                    @* <label class="custom-file-label" for="imgFile"></label> *@
+                    <span class="text-danger"></span>
+                </div>
+                <button type="button" id="addEmpButton" class="btn btn-primary">Add</button>
+                <input type="button" name="reset" id="reset" onclick="ResetEmp()" value="Reset"
+                    class="btn btn-secondary">
+            </form>
+        </div>
+        <!-- Update Form -->
+        <div class="mt-4" id="updateForm" style="display: none;">
+            <form>
+                <h3>Update Employee</h3>
+                <input type="hidden" id="updateId">
+                <div class="form-group">
+                    <label for="updateEmpName">Name:</label>
+                    <input type="text" class="form-control" id="updateEmpName" required>
+                </div>
+                <div class="form-group">
+                    <label for="updateGender">Gender:</label>
+                    <input type="text" class="form-control" id="updateGender" required>
+                </div>
+                <div class="form-group">
+                    <label for="updateDob">Date of Birth:</label>
+                    <input type="date" class="form-control" id="updateDob" required>
+                </div>
+                <div class="form-group">
+                    <label for="updateShift">Shift:</label>
+                    <select id="updateShift" class="form-control" required>
+                        <option value="Morning">Morning</option>
+                        <option value="Afternoon">Afternoon</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="updateDepartment">Department:</label>
+                    <select id="updateDepartment" class="form-control" required>
+                        <!-- Dropdown options should be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="updateEmpImage">Employee Image:</label>
+                    <input type="file" class="form-control-file" id="updateEmpImage">
+                </div>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            loadDept();
+            loadEmp();
+        });
+
+        // Function to load departments
+        function loadDept() {
+            $.ajax({
+                url: '/AjaxEmp/GetAllDept',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var deptDropdown = $('#department');
+                    deptDropdown.empty();
+                    deptDropdown.append($('<option>').val('').text('Select Department'));
+
+                    $.each(data, function (index, item) {
+                        deptDropdown.append($('<option>').val(item.c_depid).text(item.c_dename));
+                    });
+                }
+            });
+        }
+
+        // Function to load employees
+        function loadEmp() {
+            $.ajax({
+                url: '/AjaxEmp/GetAll',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $('#employeeTable tbody').empty();
+                    $.each(data, function (index, item) {
+                        $('#employeeTable tbody').append('<tr>' +
+                            '<td>' + item.c_empid + '</td>' +
+                            '<td>' + item.c_empname + '</td>' +
+                            '<td>' + item.c_gender + '</td>' +
+                            '<td>' + new Date(item.c_dob).toISOString().slice(0, 10) + '</td>' +
+                            '<td>' + item.c_shift + '</td>' +
+                            '<td>' + item.c_depid + '</td>' +
+                            '<td>' + item.c_empimage + '</td>' +
+                            '<td>' +
+                            '<button class="action-button btn btn-primary" onclick="editEmployee(' + item.c_empid + ')">Edit</button>' +
+                            '<button class="action-button btn btn-danger" onclick="deleteEmployee(' + item.c_empid + ')">Delete</button>' +
+                            '</td>' +
+                            '</tr>');
+                    });
+                }
+            });
+        }
+
+        // Function to handle employee deletion
+        function deleteEmployee(id) {
+            $.ajax({
+                url: '/AjaxEmp/DeleteConfirmed?id=' + id,
+                type: 'POST',
+                success: function (data) {
+                    alert(data.message);
+                    loadEmp(); // Reload employees after deletion
+                }
+            });
+        }
+        }
+
+        // Function to handle employee editing
+        function editEmployee(id) {
+            $.ajax({
+                url: '/AjaxEmp/GetDetails?id=' + id,
+                type: 'GET',
+                success: function (data) {
+                    $('#updateId').val(data.c_empid);
+                    $('#updateEmpName').val(data.c_empname);
+                    $('#updateGender').val(data.c_gender);
+                    $('#updateDob').val(new Date(data.c_dob).toISOString().slice(0, 10));
+                    $('#updateShift').val(data.c_shift);
+                    $('#updateDepartment').val(data.c_depid);
+                    $('#updateForm').show();
+                }
+            });
+        }
+        
+    </script>
+</body>
+
+</html>
