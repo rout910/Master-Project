@@ -173,7 +173,7 @@
                             c_empid: { type: "number", editable: false, nullable: false },
                             c_empname: { type: "string", editable: true, validation: { required: true } },
                             c_gender: { type: "string", validation: { required: true } },
-                            c_dob: { type: "date", validation: { required: true } },
+                            c_dob: {type:"string",validation:{required:true}},
                             c_shift: { type: "string", validation: { required: true } },
                             c_depid: { type: "number", validation: { required: true } },
                             c_empimage: { type: "string", validation: { required: true } }
@@ -188,7 +188,25 @@
                     { field: "c_empid", title: "Employee ID" },
                     { field: "c_empname", title: "Employee Name" },
                     { field: "c_gender", title: "Gender",editor:genderDropDownEditor, },
-                     { field: "c_dob", title: "Date of Birth", format: "{0:MM/dd/yyyy}" },
+                     {field: "c_dob",
+            title: "DOB",
+            editor: function (container, options) {
+                $(container).kendoCalendar({
+                    format: "yyyy/MM/dd",
+                    change: function () {
+                        console.log("Change :: " + kendo.toString(this.value(), 'yyyy/MM/dd'));
+                        options.model.set("c_dob",kendo.toString(this.value(), 'yyyy/MM/dd'));
+                    },
+                    navigate: function () {
+                        console.log("Navigate");
+                    }
+                }).data("kendoCalendar");
+            },
+            template: function (dataItem) {
+                var dob = kendo.toString(kendo.parseDate(dataItem.c_dob), "yyyy-MM-dd");
+                return dob;
+            }
+            },
                     { field: "c_shift", title: "Shift",
                     editor: function (container, options) {
                             var checkboxWrapper = $('<div>').appendTo(container);
