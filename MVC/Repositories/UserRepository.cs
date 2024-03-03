@@ -73,60 +73,43 @@ namespace MVC.Repositories
             return false;
         }
 
-        public bool Login(tbluser user)
+         public bool Login(tbluser user)
+    {
+        try
         {
-            try
+            _conn.Open();  
+            string query="SELECT * FROM t_muser WHERE c_emailid = @e And c_password=@p ";
+            var cmd = new NpgsqlCommand(query,_conn);
+            cmd.Parameters.AddWithValue("@e",user.c_emailid);
+            cmd.Parameters.AddWithValue("@p",user. c_password); 
+            var reader = cmd.ExecuteReader();
+            if (reader.Read())
             {
-                _conn.Open();
-
-                // string query = "SELECT * FROM t_muser WHERE c_emailid = @email AND c_password = @password";
-string query = "SELECT * FROM t_muser WHERE c_emailid = @email AND c_password = @password";
-
-                var cmd = new NpgsqlCommand(query, _conn);
-
-                cmd.Parameters.Add(new NpgsqlParameter
-                {
-                    ParameterName = "@email",
-                    NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text, // Set NpgsqlDbType
-                    Value = user.c_emailid // Set Value
-                });
-                cmd.Parameters.Add(new NpgsqlParameter
-                {
-                    ParameterName = "@password",
-                    NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text, // Set NpgsqlDbType
-                    Value = user.c_password // Set Value
-                });
-
-                var reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    var role = reader["c_userrole"].ToString();
-
-                    _conn.Close();
-
-                    return true;
-                }
-                else
-                {
-                    
-                    _conn.Close();
-
-                    return false;
-                }
-            }
-            catch (Exception ex)
+                var role = reader["c_userrole"].ToString();
+                var emailid = reader["c_emailid"].ToString();
+                var username=reader["c_username"].ToString();
+                var session = _httpContextAccessor.HttpContext.Session;
+                session.SetString("role",role);
+                session.SetString("emailid",emailid);
+                session.SetString("username",username);
+                return true;
+            } 
+            else
             {
-                Console.WriteLine($"Error in Login method: {ex.Message}");
                 return false;
             }
-            finally
-            {
-                // Close connection if it's open
-                if (_conn.State == ConnectionState.Open)
-                    _conn.Close();
-            }
+
         }
+        catch (System.Exception)
+        {
+
+            throw;
+        }
+        finally
+        {
+            _conn.Close();
+        }
+    }
 
     }
 }

@@ -36,7 +36,8 @@ namespace MVC.Repositories
                         c_gender = reader["c_gender"].ToString(),
                         c_shift = reader["c_shift"].ToString(),
                         c_depid = Convert.ToInt32(reader["c_depid"]),
-                        c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
+                        // c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
+                          c_dob = reader.GetFieldValue<DateTime>("c_dob"),
                         c_empimage = reader["c_empimage"].ToString()
                     };
 
@@ -111,7 +112,9 @@ namespace MVC.Repositories
                         c_gender = reader["c_gender"].ToString(),
                         c_shift = reader["c_shift"].ToString(),
                         c_depid = Convert.ToInt32(reader["c_depid"]),
-                        c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
+                        // c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
+                                                 c_dob = reader.GetDateTime(reader.GetOrdinal("c_dob")),
+
                         c_empimage = reader["c_empimage"].ToString()
                     };
                 }
