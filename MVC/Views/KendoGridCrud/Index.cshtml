@@ -188,9 +188,48 @@
                     { field: "c_empid", title: "Employee ID" },
                     { field: "c_empname", title: "Employee Name" },
                     { field: "c_gender", title: "Gender",editor:genderDropDownEditor, },
-                    { field: "c_dob", title: "Date of Birth", format: "{0:MM/dd/yyyy}",editor:dateOfBirthEditor, },
-                    { field: "c_shift", title: "Shift",editor:hobbyCheckBoxEditor, },
-                    { field: "c_depid", title: "Department ID",editor:deptDropDownEditor, },
+                     { field: "c_dob", title: "Date of Birth", format: "{0:MM/dd/yyyy}" },
+                    { field: "c_shift", title: "Shift",
+                    editor: function (container, options) {
+                            var checkboxWrapper = $('<div>').appendTo(container);
+
+                            checkboxWrapper.kendoCheckBoxGroup({
+                                items: [
+                                    { label: "Morning", value: "M" },
+                                    { label: "Afternoon", value: "A" }
+                                ],
+                                layout: "horizontal"
+                            });
+
+                            var checkboxGroup = checkboxWrapper.data("kendoCheckBoxGroup");
+                            checkboxGroup.value(options.model.c_shift.split(','));
+                            checkboxGroup.bind("change", function (e) {
+                                var selectedFacilities = e.sender.value().join(',');
+                                options.model.set("c_shift", selectedFacilities);
+                            });
+                        } },
+                    {
+                        field: "c_depid", title: "Dept ID", width: 100,
+
+        
+                        editor: function (container, options) {
+                            $('<input required name="' + options.field + '"/>')
+                                .attr("name", options.field)
+                                .appendTo(container)
+                                .kendoDropDownList({
+                                    dataSource: {
+                                        transport: {
+                                            read: "https://localhost:7028/kendogridcrud/FetchStates",
+        @* dataType: "get" *@
+                                                }
+                    },
+                    dataTextField: "c_dename ",
+                    dataValueField: "c_depid",
+                    optionLabel: "Select a State...",
+                    autoWidth: true
+                                        });
+        },
+            template: "#= c_depid#" },
                     { field: "c_empimage", title: "Employee Image",
                     template: "<img src='#: c_empimage #' alt='City Photo' style='width: 50px; height: 50px;' />",
                     editor: imageUploadEditor
@@ -203,21 +242,29 @@
                 sortable: true,
                 filterable: true
             });
-               function imageUploadEditor(container, options) {
-            $('<input type="file" id="temp_name" name="temp_name"  />')
-                .appendTo(container)
-                .kendoUpload({
-                    multiple: false,
-                    validation: {
-                        allowedExtensions: [".jpg", ".png", ".jpeg"]
-                    },
-                    select: imageNameChange
-                });
+       function imageUploadEditor(container, options) {
+    // Create input field for image upload
+    $('<input type="file" id="temp_name" name="temp_name"  />')
+        .appendTo(container)
+        .kendoUpload({
+            multiple: false,
+            validation: {
+                allowedExtensions: [".jpg", ".png", ".jpeg"]
+            },
+            select: imageNameChange
+        });
 
-            $('<input type="hidden" id="c_empimage" name="c_empimage" data-bind="value:c_empimage"  /> ').appendTo(container);
-        }
+    // Create input field to display current image
+    $('<input type="hidden" id="c_empimage" name="c_empimage" data-bind="value:c_empimage"  />').appendTo(container);
+
+    // Show current image if available
+    if (options.model.c_empimage) {
+        $('<img src="' + options.model.c_empimage + '" alt="Employee Image" style="width: 50px; height: 50px;" />').appendTo(container);
+    }
+}
+
           function imageNameChange(e) { 
-    $.each(e.files, function (index, value) {
+        $.each(e.files, function (index, value) {
         var formData = new FormData();
         formData.append('file', value.rawFile, value.name);
 
@@ -264,41 +311,7 @@
             .appendTo(container);
     }
 
-    function hobbyCheckBoxEditor(container, options) {
-    // Create checkboxes for city facility selection
-    var metroCheckbox = $('<input type="checkbox" name="M' + options.field + '" value="Metro">M</input>').appendTo(container);
-    var airportCheckbox = $('<input type="checkbox" name="A' + options.field + '" value="Airport">A</input>').appendTo(container);
-
-    // Check checkboxes based on city's facilities
-    var cityFacilities = options.model.c_shift.split(',');
-    if (cityFacilities.includes('M')) {
-        metroCheckbox.prop('checked', true);
-    }
-    if (cityFacilities.includes('A')) {
-        airportCheckbox.prop('checked', true);
-    }
-
-    // Update city's facility when checkboxes change
-    metroCheckbox.change(function () {
-        updateCityFacility();
-    });
-    airportCheckbox.change(function () {
-        updateCityFacility();
-    });
-
-    function updateCityFacility() {
-        var facilities = [];
-        if (metroCheckbox.is(':checked')) {
-            facilities.push('M');
-        }
-        if (airportCheckbox.is(':checked')) {
-            facilities.push('A');
-        }
-        options.model.c_shift = facilities.join(',');
-    }
-}
-
-
+   
     function dateOfBirthEditor(container, options) {
         $('<input name="' + options.field + '" required data-bind="value:' + options.field + '">')
             .appendTo(container)
