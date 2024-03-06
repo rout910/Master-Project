@@ -54,7 +54,12 @@ if (!int.TryParse(Context.Request.Query["page"], out currentPage) || currentPage
                     <td>@employee.c_dob</td>
                     <td>@employee.c_shift</td>
                     <td>@employee.c_depid</td>
-                    <td>@employee.c_empimage</td>
+                    @* <td>@employee.c_empimage</td> *@
+                    
+                    <td>
+    <img src="~/images/@employee.c_empimage" alt="Employee Image" style="max-width: 100px; max-height: 100px;" />
+</td>
+
                     
                     <td>
                         <a class="btn btn-info" asp-action="GetDetails" asp-route-id="@employee.c_empid">Details</a>

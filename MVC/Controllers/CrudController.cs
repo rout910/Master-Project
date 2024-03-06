@@ -18,10 +18,13 @@ namespace MVC.Controllers
 
         private readonly IEmpRepository _empRepository;
 
-        public CrudController(ILogger<CrudController> logger, IEmpRepository empRepository)
+        private readonly IWebHostEnvironment _environment;
+
+        public CrudController(ILogger<CrudController> logger, IEmpRepository empRepository, IWebHostEnvironment environment)
         {
             _logger = logger;
             _empRepository = empRepository;
+            _environment = environment;
         }
 
         public IActionResult Index()
@@ -47,13 +50,38 @@ namespace MVC.Controllers
 
             return View();
         }
-
         [HttpPost]
-        public IActionResult Insert(tblemp employee)
+        public IActionResult Insert(tblemp emp, IFormFile photo)
         {
-            _empRepository.Insert(employee);
+            if (photo != null)
+            {
+                string uploadsFolder = Path.Combine(_environment.WebRootPath, "images");
+
+
+                string uniqueFilename = Guid.NewGuid().ToString() + "_" + photo.FileName;
+                string filepath = Path.Combine(uploadsFolder, uniqueFilename);
+
+
+                using (var stream = new FileStream(filepath, FileMode.Create))
+                {
+                    photo.CopyTo(stream);
+                }
+
+                Console.WriteLine("Upload PHOTO ::::    " + uniqueFilename);
+                emp.c_empimage = uniqueFilename;
+
+                Console.WriteLine("C IMAGE : : : : :      " + emp.c_empimage);
+            }
+            else
+            {
+                Console.WriteLine("NOT FOUND");
+            }
+            Console.WriteLine(emp.c_empimage);
+            _empRepository.Insert(emp);
             return RedirectToAction("GetAll");
         }
+
+
 
         [HttpGet]
         public IActionResult GetDetails(int id)
@@ -70,30 +98,64 @@ namespace MVC.Controllers
 
             return View(employee);
         }
+[HttpGet]
+public IActionResult Update(int id)
+{
+    var courses = _empRepository.GetDept();
+    ViewBag.Courses = new SelectList(courses, "c_depid", "c_dename");
 
-        [HttpGet]
-        public IActionResult Update(int id)
-        {
+    var employee = _empRepository.GetOne(id);
+    if (employee == null)
+    {
+        return NotFound();
+    }
 
-            var departments = _empRepository.GetDept();
+    // Assuming c_empimage contains the filename of the image
+    employee.c_empimage = Path.Combine("/images/", employee.c_empimage);
+
+    return View(employee);
+}
 
 
-            // Populate ViewBag.Courses with the courses collection
-            ViewBag.Course = departments;
+       [HttpPost]
+public IActionResult Update(tblemp employee, IFormFile photo)
+{
+    if (ModelState.IsValid)
+    {
+        if (photo != null)
+            {
+                string uploadsFolder = Path.Combine(_environment.WebRootPath, "images");
 
 
-            var employee = _empRepository.GetOne(id);
-            return View(employee);
+                string uniqueFilename = Guid.NewGuid().ToString() + "_" + photo.FileName;
+                string filepath = Path.Combine(uploadsFolder, uniqueFilename);
 
-        }
 
-        [HttpPost]
-        public IActionResult Update(tblemp employee)
-        {
+                using (var stream = new FileStream(filepath, FileMode.Create))
+                {
+                    photo.CopyTo(stream);
+                }
 
-            _empRepository.Update(employee);
-            return RedirectToAction("GetAll");
-        }
+                Console.WriteLine("Upload PHOTO ::::    " + uniqueFilename);
+                employee.c_empimage = uniqueFilename;
+
+                Console.WriteLine("C IMAGE : : : : :      " + employee.c_empimage);
+            }
+            else
+            {
+                Console.WriteLine("NOT FOUND");
+            }
+        _empRepository.Update(employee);
+        Console.WriteLine("+++");
+        return RedirectToAction("GetAll");
+    }
+    else
+    {
+        // Handle invalid model state, possibly return the same view with validation errors
+        return View(employee);
+    }
+}
+
 
         [HttpGet]
         public IActionResult Delete(int id)
@@ -113,7 +175,14 @@ namespace MVC.Controllers
             return RedirectToAction("GetAll");
         }
 
-
+        [HttpGet]
+        public IActionResult User()
+        {
+            var user = HttpContext.Session.GetString("username");
+            Console.WriteLine("USER    : : : : : : ::::    " + user);
+            List<tblemp> employees = _empRepository.GetEmployeeFromUserName(user);
+            return View(employees);
+        }
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
