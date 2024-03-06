@@ -11,10 +11,12 @@ namespace MVC.Repositories
     public class EmpRepository : IEmpRepository
     {
         private readonly NpgsqlConnection _conn;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public EmpRepository(NpgsqlConnection connection)
+        public EmpRepository(NpgsqlConnection connection,IHttpContextAccessor httpContextAccessor)
         {
             _conn = connection;
+            _httpContextAccessor = httpContextAccessor;
         }
         public List<tblemp> GetAll()
         {
@@ -135,12 +137,58 @@ namespace MVC.Repositories
                 _conn.Close();
             }
         }
+        public List<tblemp> GetEmployeeFromUserName(string user)
+        {
+            Console.WriteLine("USER DATA :: : : : : " + user);
+            List<tblemp> empList = new List<tblemp>();
+            NpgsqlCommand cmd = new NpgsqlCommand();
+            try
+            {
+                _conn.Open();
+                cmd.Connection = _conn;
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "SELECT * FROM t_mcrud where c_username = @username  ORDER BY c_empid ";
+
+                cmd.Parameters.AddWithValue("@username", user);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var employee = new tblemp
+                        {
+                        c_empid = Convert.ToInt32(reader["c_empid"]),
+                        c_empname = reader["c_empname"].ToString(),
+                        c_gender = reader["c_gender"].ToString(),
+                        c_shift = reader["c_shift"].ToString(),
+                        c_depid = Convert.ToInt32(reader["c_depid"]),
+                        // c_dob = reader.GetFieldValue<DateOnly>("c_dob"),
+                          c_dob = reader.GetFieldValue<DateTime>("c_dob"),
+                        c_empimage = reader["c_empimage"].ToString()
+                        };
+                        empList.Add(employee);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+            finally
+            {
+                _conn.Close();
+            }
+            return empList;
+        }
 
 
         public void Insert(tblemp stud)
         {
+            var ename = _httpContextAccessor.HttpContext.Session.GetString("username");
             _conn.Open();
-            using var command = new NpgsqlCommand("INSERT INTO t_mcrud(c_empname, c_gender, c_shift, c_depid, c_dob, c_empimage) VALUES (@empname, @gender, @shift, @depid, @dob, @image)", _conn);
+            using var command = new NpgsqlCommand("INSERT INTO t_mcrud(c_empname, c_gender, c_shift, c_depid, c_dob, c_empimage,c_username) VALUES (@empname, @gender, @shift, @depid, @dob, @image,@una)", _conn);
             command.CommandType = CommandType.Text;
 
             // Set parameter values with explicit NpgsqlDbType
@@ -150,6 +198,8 @@ namespace MVC.Repositories
             command.Parameters.AddWithValue("@depid", stud.c_depid);
             command.Parameters.AddWithValue("@dob", stud.c_dob);
             command.Parameters.AddWithValue("@image", stud.c_empimage);
+            command.Parameters.AddWithValue("@una", stud.c_empname);
+            
 
             command.ExecuteNonQuery();
             _conn.Close();
