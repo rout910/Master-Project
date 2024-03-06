@@ -20,5 +20,6 @@ namespace MVC.Repositories
         void  Delete (int id);
 
         tblemp GetOne(int id);
+        List<tblemp> GetEmployeeFromUserName(string user);
     }
 }
