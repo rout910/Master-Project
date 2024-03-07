@@ -1,51 +1,93 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MVC.Models;
+using MVC.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
-using MVC.Repositories;
-
+using System.IO;
 
 namespace MVC.Controllers
 {
-   //
-   [Route("[controller]")]
     public class MVCCrudApiController : Controller
     {
-        private readonly IEmpRepository _emp;
-        private readonly ILogger<MVCCrudApiController> _logger;
+        private readonly IWebHostEnvironment _environment;
+        private readonly IEmpRepository _repo;
+         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public MVCCrudApiController(ILogger<MVCCrudApiController> logger,IEmpRepository empRepository)
+        public MVCCrudApiController(IEmpRepository repo, IWebHostEnvironment webHostEnvironment,IHttpContextAccessor httpContextAccessor)
         {
-            _logger = logger;
-            _emp = empRepository;
-           
+            _repo = repo;
+            _environment = webHostEnvironment;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        [Route("Index")]
+        [HttpGet]
         public IActionResult Index()
         {
-            
+            // var userId = _httpContextAccessor.HttpContext.Session.GetInt32("UserId");
             return View();
         }
 
-         [Route("Update")]
-         [HttpGet("{id})")]
-         
-        public IActionResult Update(int id)
+        [Produces("application/json")]
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            ViewBag.c_empid = id;
-            ViewBag.Title = "Update";
-            var department = _emp.GetDept();
-            ViewBag.Departments = department;
-             return View(id);
-          
+            var cities = _repo.GetAll();
+            return Json(cities);
+        }
+        [HttpPost]
+        public IActionResult add(tblemp emp,IFormFile c_profiles)
+        {
+            var filePath = Path.Combine(@"C:\Users\bharg\OneDrive\Desktop\Bhargav\WebApp\WebApp\wwwroot\", "images", c_profiles.FileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                c_profiles.CopyTo(stream);
+            }
+
+            emp.c_empimage = c_profiles.FileName;
+            _repo.Insert(emp);
+             return Json(new { success = true});  
+        }
+        [HttpGet]
+        public IActionResult FetchStates()
+        {
+            List<tbldept> states = _repo.GetDept();
+            return Json(states);
+        }
+       [HttpPost]
+public IActionResult UploadImage(IFormFile file)
+{
+    if (file != null && file.Length > 0)
+    {
+        var uploads = Path.Combine(_environment.WebRootPath, "images"); // Assuming you have a folder named 'image' in wwwroot
+        var filePath = Path.Combine(uploads, file.FileName);
+
+        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            file.CopyTo(fileStream);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        var imageUrl= file.FileName; // Assuming your image URL is relative
+        return Json(new { imageUrl });
+    }
+    return Json(new { error = "No file uploaded or file is empty." });
+}
+        [HttpPost]
+        public IActionResult UpdateCity(tblemp city)
+        {
+                _repo.Update(city);
+                return Json(new { success = true });
+        }
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+                Console.WriteLine("Received id:" +id);
+                _repo.Delete(id);
+                return Json(new { success = true, message = "City deleted." });
+        }
+
         public IActionResult Error()
         {
             return View("Error!");

@@ -12,55 +12,57 @@ namespace WEBAPI.Controllers
     [Route("api/[controller]")]
     public class CrudApiController : ControllerBase
     {
-        private readonly IEmpRepository _emprepo;
+        private readonly IWebHostEnvironment _environment;
+        private readonly IEmpRepository _repo;
 
-         public CrudApiController(IEmpRepository empRepository)
+        public CrudApiController(IEmpRepository repo, IWebHostEnvironment webHostEnvironment)
         {
-            _emprepo = empRepository;
+            _repo = repo;
+            _environment = webHostEnvironment;
         }
 
-        
-        [HttpGet]
-        public List<tblemp> GetAll()
+        [HttpGet("GetAll")]
+        public IActionResult GetAll()
         {
-                return _emprepo.GetAll();
-                // int.Parse(HttpContext.User.Claims.First(i =>i.Type == "UserId").Value);
-               
-        }
-        [HttpGet("{id}")]
-        public tblemp GetOne(int id)
-        {
-            return _emprepo.GetOne(id);
+            var cities = _repo.GetAll();
+            return Ok(cities);
         }
 
-
-        [HttpPost]
-        [Route("Insert")]
-
-        public IActionResult Insert(tblemp stud)
+        [HttpPost("Add")]
+        public IActionResult Add([FromForm] tblemp emp)
         {
-            _emprepo.Insert(stud);
-            return Ok();
+            //  var filePath = Path.Combine(@"C:\Users\bharg\OneDrive\Desktop\Bhargav\WebApp\WebApp\wwwroot\", "images", c_profiles.FileName);
+
+            // using (var stream = new FileStream(filePath, FileMode.Create))
+            // {
+            //     c_profiles.CopyTo(stream);
+            // }
+
+            // emp.c_empimage = c_profiles.FileName;
+            _repo.Insert(emp);
+            return Ok(new { success = true });
         }
 
-         [HttpGet]
-        [Route("GetAllDepartment")]
-        public IActionResult GetAllDepartment()
+        [HttpGet("FetchStates")]
+        public IActionResult FetchStates()
         {
-            List<tbldept> courses = _emprepo.GetDept();
-            return Ok(courses);
+            List<tbldept> states = _repo.GetDept();
+            return Ok(states);
         }
 
+        [HttpPut("UpdateCity")]
+        public IActionResult UpdateCity([FromForm] tblemp city)
+        {
+            _repo.Update(city);
+            return Ok(new { success = true });
+        }
 
-        [HttpPut]
-        public void Update(tblemp stud)
+        [HttpDelete("Delete/{id}")]
+        public IActionResult Delete(int id)
         {
-            _emprepo.Update(stud);
+            Console.WriteLine("Received id:" + id);
+            _repo.Delete(id);
+            return Ok(new { success = true, message = "City deleted." });
         }
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-            _emprepo.Delete(id);
-        }
-    }
+       }
 }

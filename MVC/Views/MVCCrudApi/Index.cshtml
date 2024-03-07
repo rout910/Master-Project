@@ -1,83 +1,253 @@
-@{
-    ViewBag.Title = "Index";
-}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee List</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2 class="mt-5 mb-4">Employee List</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="tableProduct">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>DOB</th>
+                        <th>Shift</th>
+                        <th>Department ID</th>
+                        <th>Image</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                   
+                </tbody>
+            </table>
+        </div>
+        <button class="btn btn-success mt-3 mb-5" onclick="showInsertForm()">Add Employee</button>
 
-<h2>Index</h2>
+        <div id="insertForm" style="display:none;">
+            <h2 class="mt-4">Add Employee</h2>
+            <form id="addForm" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="name" name="c_empname" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    Gender:
+                    <input type="radio" id="male" name="c_gender" value="Male">
+                    <label for="male">Male</label>
+                    <input type="radio" id="female" name="c_gender" value="Female">
+                    <label for="female">Female</label>
+                </div>
+                <div class="form-group">
+                    DOB: <input type="date" class="form-control" id="dob" name="c_dob">
+                </div>
+                <div class="form-group">
+                    Shift:
+                    <input type="checkbox" id="morning" name="c_shift" value="Morning">
+                    <label for="morning">Morning</label>
+                    <input type="checkbox" id="night" name="c_shift" value="Night">
+                    <label for="night">Night</label>
+                </div>
+                <div class="form-group">
+                    Department:
+                    <select class="form-control" id="department" name="c_depid">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    Image: <input type="file" class="form-control-file" id="c_empimage" name="c_empimage" accept="image/*" onchange="previewImage()">
+                </div>
+                 <div class="form-group">
+                    <img id="imagepreview" src="#" alt="Employee Image" style="max-width: 150px; max-height: 150px; display: none;">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="InsertOrUpdateEmployee()">Submit</button>
+            </form>
+        </div>
+   <script>
+     function previewImage() {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $('#imagepreview').attr('src', e.target.result);
+            $('#imagepreview').show();
+        }
+        reader.readAsDataURL($('#c_empimage')[0].files[0]);
+    }
+</script>
+   <script>
+     $(document).ready(function () {
+        // Check if the user is logged in
+       
+            // Load employee data
+            LoadEmployee();
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-<script>
-    @* if (localStorage.getItem('token') == null) {
-        window.location = '/UserMVC/Login';
-    } *@
-
-    $(document).ready(function () {
-        LoadProduct();
+        
+        $.ajax({
+            url: '/AjaxEmp/GetAllDept',
+            type: 'GET',
+            success: function (departments) {
+                departments.forEach(function(department) {
+                    $('#department').append('<option value="' + department.c_depid + '">' + department.c_dename + '</option>');
+                });
+            }
+        });
     });
 
-    function LoadProduct() {
+    // Function to populate department dropdown
+   
+ function LoadEmployee() {
         var settings = {
-            "url": "https://localhost:7123/api/CrudApi",
-            "method": "GET",
-            "timeout": 0,
-           // "headers": { "Authorization": 'Bearer ' + localStorage.getItem('token') }
+            url: "https://localhost:7123/api/CrudApi/GetAll",
+            method: "GET",
+            headers: { "Authorization": 'Bearer ' + localStorage.getItem('token') }
         };
 
-        $.ajax(settings).done(function (response) {
-            var Products = "";
-            $.each(response,
-                function (index, value) {
-                    Products += '<tr>'
-                        + '<td><a href="/MVCCrudApi/Update/?id=' + value.c_empid + '" class="btn btn-primary">Edit</a></td>'
-                        + '<td>' + value.c_empid + '</td>'
-                        + '<td>' + value.c_empname + '</td>'
-                        + '<td>' + value.c_gender + '</td>'
-                        + '<td>' + value.c_deptid + '</td>'
-                        + '<td>' + value.c_empimage + '</td>'
-                        + '<td>' + value.c_dob + '</td>'
-                        + '<td>' + value.c_shift + '</td>'
-                        + '<td><button onclick="DeleteProduct(' + value.c_empid + ')" class="btn btn-danger">Delete</button></td>'
-                        + '</tr>';
+        $.ajax(settings)
+            .done(function (response) {
+                // Clear table body
+                $('#tableProduct tbody').empty();
+
+                // Populate table with employee data
+                $.each(response, function (index, value) {
+                    var row = '<tr>' +
+                        '<td><button onclick="getDetails(' + value.c_empid + ')" class="btn btn-primary">Edit</button></td>' +
+                        '<td>' + value.c_empid + '</td>' +
+                        '<td>' + value.c_empname + '</td>' +
+                        '<td>' + value.c_gender + '</td>' +
+                        '<td>' + value.c_depid + '</td>' +
+                        '<td><img src="/images/' + value.c_empimage + '" width="100" alt="' + value.c_empimage + '"></td>' +
+                        '<td>' + value.c_dob + '</td>' +
+                        '<td>' + value.c_shift + '</td>' +
+                        '<td><button onclick="deleteEmployee(' + value.c_empid + ')" class="btn btn-danger">Delete</button></td>' +
+                        '</tr>';
+                    $('#tableProduct tbody').append(row);
                 });
-            $('#tableProduct tbody').append(Products);
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("Error loading employees:", errorThrown);
+            });
+    }
+
+    function showInsertForm() {
+        $('#insertForm').show();
+        $('#updateForm').hide();
+    }
+function InsertOrUpdateEmployee() {
+    var shift = [];
+    $("input[name='c_shift']:checked").each(function(){
+        shift.push($(this).val());
+    });
+
+    var data = new FormData($('#addForm')[0]);
+
+    // Append c_shift values
+    data.append('c_shift', shift);
+
+    // Append image file
+    var imageFile = $('#c_empimage')[0].files[0];
+    data.append('file', imageFile);
+
+    var imageUrl = '/MVCCrudApi/uploadimage'; // URL for uploading image
+
+    // Upload image
+    $.ajax({
+        url: imageUrl,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        data: data,
+        success: function (imageResponse) {
+            // Once the image is uploaded, get the image URL
+            var imagePath = imageResponse.imageUrl;
+
+            // Set the imagePath value in the form data
+            data.append('c_empimage', imagePath);
+
+            var url = 'https://localhost:7123/api/CrudApi/Add';
+            method="POST"; // Default URL for insert operation
+
+            // Check if there's a value for c_empid (which indicates an update operation)
+            if ($('#insertForm #c_empid').val()) {
+                url = 'https://localhost:7123/api/CrudApi/UpdateCity';
+                method="PUT"; // Change URL to update operation
+            }
+
+            $.ajax({
+                url: url,
+                type: 'method',
+                processData: false,
+                contentType: false,
+                data: data,
+                success: function (response) {
+                    alert("Success!............");
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    alert('Error: ' + xhr.responseText);
+                }
+            });
+        },
+        error: function (xhr, status, error) {
+            alert('Error uploading image: ' + xhr.responseText);
+        }
+    });
+}
+
+    function getDetails(id) {
+        $.ajax({
+            url: '/AjaxEmp/GetDetails?id=' + id,
+            type: 'GET',
+            success: function (employee) {
+                // Populate Add Employee form with employee details
+                $('#insertForm #name').val(employee.c_empname);
+                // Set gender
+                if (employee.c_gender === 'Male') {
+                    $('#insertForm #male').prop('checked', true);
+                } else {
+                    $('#insertForm #female').prop('checked', true);
+                }
+                 $('#insertForm #dob').val(employee.c_dob.split('T')[0]); 
+
+                // Set shift
+                if (employee.c_shift.includes('Morning')) {
+                    $('#insertForm #morning').prop('checked', true);
+                }
+                if (employee.c_shift.includes('Night')) {
+                    $('#insertForm #night').prop('checked', true);
+                }
+                $('#insertForm #department').val(employee.c_depid);
+                
+             if (employee.c_empimage) {
+    // Set the image preview
+    $('#imagepreview').attr('src', '/images/' + employee.c_empimage);
+}
+
+
+                
+                $('#insertForm').show();
+                $('#addForm button').text('Update'); 
+            },
+            error: function (xhr, status, error) {
+                alert('Error fetching employee details: ' + xhr.responseText);
+            }
         });
     }
 
-    function DeleteProduct(c_empid) {
-        if (confirm("Do you want to delete?") == true) {
-            var settings = {
-                "url": "https://localhost:7123/api/CrudApi/" + c_empid,
-                "method": "DELETE",
-                "timeout": 0,
-              //  "headers": { "Authorization": 'Bearer ' + localStorage.getItem('token') }
+    function deleteEmployee(id) {
+        $.ajax({
+            url: 'https://localhost:7123/api/CrudApi/Delete/' + id,
+            type: 'DELETE',
+            success: function (response) {
+                alert(response.message);
+                location.reload();
             }
-            $.ajax(settings).done(function (response) {
-                window.location = "/MVCCrudApi/Index";
-            });
-
-        }
+        });
     }
 </script>
 
-<br /><br />
 
-<a href="/MVCCrudApi/Update" class="btn btn-primary">Add New Employee</a>
-
-<table class="table table-bordered table-hover" id="tableProduct">
-    <thead class="thead-dark">
-        <tr>
-            <th>Edit</th>
-            <th>Id</th>
-            <th>Employee Name</th>
-            <th>Gender</th>
-            <th>Department Id</th>
-            <th>Image</th>
-            <th>Date</th>
-            <th>Shift</th>
-            <th>Delete</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Product data will be inserted here -->
-    </tbody>
-</table>
+   </body>
+</html>
