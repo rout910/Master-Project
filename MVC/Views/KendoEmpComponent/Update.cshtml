@@ -6,7 +6,10 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<form id="employeeForm" enctype="multipart/form-data">
+<form id="employeeForm" method="post" action="Update" enctype="multipart/form-data">
+    <label for="c_empid">EmpId:</label>
+    <input type="text" id="c_empid" name="c_empid" class="k-textbox" value="@Model.c_empid" /><br>
+    
     <label for="name">Name:</label>
     <input type="text" id="name" name="c_empname" class="k-textbox" value="@Model.c_empname" /><br>
 
@@ -39,7 +42,7 @@
             <img src="@Url.Content("~/images/" + Model.c_empimage)" alt="Employee Image" style="max-width: 200px;" />
         }
     </div>
-    <button type="button" id="saveButton" class="k-button k-primary">Update</button>
+    <button type="button" id="saveButton" name="saveButton" class="k-button k-primary">Update</button>
 </form>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -78,16 +81,22 @@
 
             // Event handler for updating employee data
             $("#saveButton").click(function () {
+                var c_empid = $('#c_empid').val(); // Assuming c_empid is retrieved from an input field
                 var formData = new FormData($("#employeeForm")[0]);
+    
+                // Append c_empid to the URL
+                var url = "https://localhost:7028/kendoempcomponent/update/" + c_empid;
+
                 $.ajax({
-                    url: "https://localhost:7028/kendoempcomponent/update/",
+                    url: url,
                     type: "POST",
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function (response) {
                         console.log(response);
-                        window.location.href = "https://localhost:7028/kendoempcomponent/Index";
+                        // Redirect to the index page or perform any other actions upon success
+                        // window.location.href = "https://localhost:7028/kendoempcomponent/Index";
                     },
                     error: function (xhr, status, error) {
                         console.log(error);
