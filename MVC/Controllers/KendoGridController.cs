@@ -50,14 +50,14 @@ public IActionResult Login(tbluser user)
 {
     if(_userRepo.Login(user))
     {
-        if(HttpContext.Session.GetString("c_userrole")=="Admin")
+        if(HttpContext.Session.GetString("role")=="Admin")
         {
             return RedirectToAction("Index", "KendoGridCrud");
         
         }
         else
         {
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("User1", "KendoGridCrud");
         
             }
     }

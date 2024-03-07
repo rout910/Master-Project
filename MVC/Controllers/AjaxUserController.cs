@@ -13,11 +13,10 @@ namespace MVC.Controllers
 {
     public class AjaxUserController : Controller
     {
-        private readonly IUserRepositories _userRepositories;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private IUserRepositories? userRepositories;
+        private IUserRepository? _userRepositories;
 
-        public AjaxUserController(IUserRepository userRepository, IHttpContextAccessor httpContextAccessor)
+        public AjaxUserController(IUserRepository userRepositories, IHttpContextAccessor httpContextAccessor)
         {
             _userRepositories = userRepositories;
             _httpContextAccessor = httpContextAccessor;
@@ -38,6 +37,8 @@ namespace MVC.Controllers
         [HttpPost]
         public IActionResult Login([FromBody] tbluser user)
         {
+            Console.WriteLine("USSSSEEEEEEEEERRRRRRR::::" + user.c_emailid);
+            Console.WriteLine("PASSSSSWORD::::" + user.c_password);
             _userRepositories.Login(user);
 
             var role = HttpContext.Session.GetString("role");
@@ -47,7 +48,7 @@ namespace MVC.Controllers
             }
             else
             {
-                return Json(new { success = true, redirectUrl = Url.Action("Index1", "AjaxEmp") });
+                return Json(new { success = true, redirectUrl = Url.Action("User", "AjaxEmp") });
             }
         }
 

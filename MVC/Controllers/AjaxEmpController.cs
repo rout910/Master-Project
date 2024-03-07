@@ -22,6 +22,14 @@ namespace MVC.Controllers
             _empRepository = empRepository;
             _webHostEnvironment = webHostEnvironment;
         }
+          [HttpGet]
+        public IActionResult User()
+        {
+            var user = HttpContext.Session.GetString("username");
+            Console.WriteLine("USER    : : : : : : ::::    " + user);
+            List<tblemp> employees = _empRepository.GetEmployeeFromUserName(user);
+            return View(employees);
+        }
 
         [HttpGet]
         public IActionResult Index()

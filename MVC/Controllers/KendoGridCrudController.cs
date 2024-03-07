@@ -29,9 +29,24 @@ namespace MVC.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
+            // if(HttpContext.Session.GetString("username")=="")
             var cities = _repo.GetAll();
             return Json(cities);
         }
+        [HttpGet]
+        public IActionResult User()
+        {
+              var user = HttpContext.Session.GetString("username");
+                Console.WriteLine("USER    : : : : : : ::::    " + user);
+                List<tblemp> employees = _repo.GetEmployeeFromUserName(user);
+                return Json(employees);
+        }
+
+        public IActionResult User1()
+        {
+            return View();
+        }
+
         [HttpPost]
         public IActionResult add(tblemp emp)
         {
