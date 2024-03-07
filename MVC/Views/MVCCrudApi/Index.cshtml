@@ -166,23 +166,21 @@ function InsertOrUpdateEmployee() {
             // Set the imagePath value in the form data
             data.append('c_empimage', imagePath);
 
-            var url = 'https://localhost:7123/api/CrudApi/Add';
-            method="POST"; // Default URL for insert operation
+            var url = 'https://localhost:7123/api/CrudApi/Add'; // Default URL for insert operation
 
             // Check if there's a value for c_empid (which indicates an update operation)
             if ($('#insertForm #c_empid').val()) {
-                url = 'https://localhost:7123/api/CrudApi/UpdateCity';
-                method="PUT"; // Change URL to update operation
+                url = 'https://localhost:7123/api/CrudApi/UpdateCity'; // Change URL to update operation
             }
 
             $.ajax({
                 url: url,
-                type: 'method',
+                type: 'POST',
                 processData: false,
                 contentType: false,
                 data: data,
                 success: function (response) {
-                    alert("Success!............");
+                    alert("Succes!...............");
                     location.reload();
                 },
                 error: function(xhr, status, error) {
