@@ -35,11 +35,11 @@ namespace MVC.Controllers
                 var role = HttpContext.Session.GetString("role");
                 if (role == "Admin")
                 {
-                    return RedirectToAction("Index", "AdminCRUD");
+                    return RedirectToAction("GetAll", "Crud");
                 }
                 else
                 {
-                    return RedirectToAction("GetAll", "Crud");
+                    return RedirectToAction("User", "Crud");
                 }
             }
             else
