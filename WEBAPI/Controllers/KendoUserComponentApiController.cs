@@ -1,5 +1,10 @@
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using WEBAPI.Models;
 using WEBAPI.Repositories;
 
@@ -9,44 +14,56 @@ namespace WEBAPI.Controllers
     [Route("api/[controller]")]
     public class KendoUserComponentApiController : ControllerBase
     {
-        private readonly ILogger<KendoUserComponentApiController> _logger;
-        private readonly IUserRepository _userRepo;
+        private readonly IUserRepository _userrepo;
+        private readonly IConfiguration _configuration;
 
-        public KendoUserComponentApiController(ILogger<KendoUserComponentApiController> logger, IUserRepository userRepo)
+        public KendoUserComponentApiController(IUserRepository userrepo, IConfiguration configuration)
         {
-            _logger = logger;
-            _userRepo = userRepo;
-        }
-
-        [HttpPost]
-        [Route("Insert")]
-        public IActionResult Insert([FromBody] tbluser user)
-        {
-            _userRepo.Register(user);
-            return Ok(); // Assuming a successful insertion. You can also return a specific status code.
+            _userrepo = userrepo;
+            _configuration = configuration;
         }
 
         [HttpPost]
         [Route("Login")]
-        public IActionResult Login([FromBody] tbluser user)
+        public IActionResult Login([FromBody] tbluser User)
         {
-            if (_userRepo.Login(user))
+            bool isLoggedIn = _userrepo.Login(User);
+            if (isLoggedIn)
             {
-                if (HttpContext.Session.GetString("c_userrole") == "Admin")
+                var claims = new[]
                 {
-                    return RedirectToAction("Index", "KendoEmpComponent");
-                }
-                else
-                {
-                    return RedirectToAction("Create", "KendoEmpComponent");
-                }
+                    new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+                    new Claim("Userid", User.c_id.ToString()),
+                    new Claim("UserName", User.c_username),
+                    new Claim("Email", User.c_emailid),
+                };
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(
+                    _configuration["Jwt:Issuer"],
+                    _configuration["Jwt:Audience"],
+                    claims,
+                    expires: DateTime.UtcNow.AddDays(1),
+                    signingCredentials: signIn
+                );
+
+                return Ok(new JwtSecurityTokenHandler().WriteToken(token));
             }
             else
             {
-                return Unauthorized(); // Or you can return any other appropriate status code.
+                return BadRequest("Invalid Credentials");
             }
         }
 
-        
+        [HttpPost]
+        [Route("Register")]
+        public IActionResult Register([FromBody] tbluser User)
+        {
+            _userrepo.Register(User);
+            return Ok();
+        }
     }
 }
