@@ -106,17 +106,29 @@ public IActionResult Update(int id)
 }
     
 
-    [HttpPost]
-    public IActionResult Update(tblemp emp)
-    {
-        if (ModelState.IsValid)
-        {
-            _empRepo.Update(emp);
-            return RedirectToAction("Index"); 
+    // [HttpPost]
+    // public IActionResult Update(tblemp emp)
+    // {
+    //     if (ModelState.IsValid)
+    //     {
+    //         _empRepo.Update(emp);
+    //         return RedirectToAction("Index"); 
             
-        }
-        return View(emp);
+    //     }
+    //     return View(emp);
+    // }
+
+    [HttpPost]
+public IActionResult Update(tblemp emp)
+{
+    if (ModelState.IsValid)
+    {
+        _empRepo.Update(emp);
+        Console.WriteLine("---------");
+        return RedirectToAction("Index"); 
     }
+    return View(emp);
+}
 
     [HttpDelete]
     public IActionResult Delete(int id)

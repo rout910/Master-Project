@@ -14,18 +14,19 @@
     <input type="text" id="name" name="c_empname" class="k-textbox" value="@Model.c_empname" /><br>
 
     <label for="gender">Gender:</label>
-    <input type="radio" id="male" name="c_gender" value="Male" class="k-radio" checked="@Model.c_gender == 'Male'" />
+    <input type="radio" id="male" name="c_gender" value="Male"  checked="@Model.c_gender == 'Male'" />
     <label for="male" class="k-radio-label">Male</label>
-    <input type="radio" id="female" name="c_gender" value="Female" class="k-radio" checked="@Model.c_gender == 'Female'" />
+    <input type="radio" id="female" name="c_gender" value="Female"  checked="@Model.c_gender == 'Female'" />
     <label for="female" class="k-radio-label">Female</label>
 
     <div>
-        Shift:
-        <input type="checkbox" id="c_shiftMorning" name="c_shift" value="Morning" class="k-checkbox" @(Model.c_shift.Contains("Morning") ? "checked" : "") />
-        <label for="morningShift" class="k-checkbox-label">Morning</label>
-        <input type="checkbox" id="c_shiftNight" name="c_shift" value="Night" class="k-checkbox" @(Model.c_shift.Contains("Night") ? "checked" : "") />
-        <label for="nightShift" class="k-checkbox-label">Night</label>
-    </div>
+    Shift:
+    <input type="checkbox" id="c_shiftMorning" name="c_shift" value="Morning" @(Model.c_shift.Contains("Morning") ? "checked" : "") />
+    <label for="morningShift" class="k-checkbox-label">Morning</label>
+    <input type="checkbox" id="c_shiftNight" name="c_shift" value="Night" @(Model.c_shift.Contains("Night") ? "checked" : "") />
+    <label for="nightShift" class="k-checkbox-label">Night</label>
+</div>
+
     <div>
         <label for="c_depid">Department:</label>
         <select id="departmentList" name="c_depid"></select><br>
@@ -35,14 +36,14 @@
         <input type="date" id="c_dob" name="c_dob" class="k-datepicker" style="width: 100%;" value="@Model.c_dob.ToString("yyyy-MM-dd")" />
     </div>
     <div>
-        <label for="ImageFile">Employee Image:</label>
-        <input type="file" id="ImageFile" name="file" class="k-upload"/><br />
-        @if (!string.IsNullOrEmpty(Model.c_empimage))
+        <label for="c_empimage">Employee Image:</label>
+        <input type="text"  name="c_empimage" class="k-upload"/><br />
+        @* @if (!string.IsNullOrEmpty(Model.c_empimage))
         {
-            <img src="@Url.Content("~/images/" + Model.c_empimage)" alt="Employee Image" style="max-width: 200px;" />
-        }
+            <img src="@Url.Content("~/images/" + Model.c_empimage)" alt="Employee Image" style="max-width: 200px;" /> 
+        }*@
     </div>
-    <button type="button" id="saveButton" name="saveButton" class="k-button k-primary">Update</button>
+    <button type="submit" id="saveButton" name="saveButton" class="k-button k-primary">Update</button>
 </form>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -51,58 +52,62 @@
 <script src="https://kendo.cdn.telerik.com/2022.1.301/js/kendo.all.min.js"></script>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            // Fetch departments and set the selected value
+  <script>
+    $(document).ready(function () {
+        // Fetch departments and set the selected value
+        $.ajax({
+            url: "https://localhost:7028/kendoempcomponent/GetDeptName",
+            type: "GET",
+            success: function (data) {
+                var departments = data;
+                var $dropdown = $("#departmentList");
+
+                // Clear existing options
+                $dropdown.empty();
+
+                // Add option for each department
+                $.each(departments, function (index, department) {
+                    $dropdown.append($("<option></option>")
+                        .attr("value", department.c_depid)
+                        .text(department.c_dename));
+                });
+
+                // Set selected value
+                $dropdown.val("@Model.c_depid");
+            },
+            error: function (xhr, status, error) {
+                console.log(error);
+            }
+        });
+
+        debugger;
+        // Event handler for updating employee data
+        $("#employeeForm").submit(function (e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            var c_empid = $('#c_empid').val(); // Assuming c_empid is retrieved from an input field
+            var formData = new FormData($("#employeeForm")[0]);
+
+            // Append c_empid to the URL
+            var url = "https://localhost:7028/kendoempcomponent/update/" + c_empid;
+
             $.ajax({
-                url: "https://localhost:7028/kendoempcomponent/GetDeptName",
-                type: "GET",
-                success: function (data) {
-                    var departments = data;
-                    var $dropdown = $("#departmentList");
-            
-                    // Clear existing options
-                    $dropdown.empty();
-
-                    // Add option for each department
-                    $.each(departments, function (index, department) {
-                        $dropdown.append($("<option></option>")
-                            .attr("value", department.c_depid)
-                            .text(department.c_dename));
-                    });
-
-                    // Set selected value
-                    $dropdown.val("@Model.c_depid");
+                url: url,
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response);
+                    // Redirect to the index page or perform any other actions upon success
+                     window.location.href = "https://localhost:7028/kendoempcomponent/Index"; 
                 },
                 error: function (xhr, status, error) {
                     console.log(error);
                 }
             });
-
-            // Event handler for updating employee data
-            $("#saveButton").click(function () {
-                var c_empid = $('#c_empid').val(); // Assuming c_empid is retrieved from an input field
-                var formData = new FormData($("#employeeForm")[0]);
-    
-                // Append c_empid to the URL
-                var url = "https://localhost:7028/kendoempcomponent/update/" + c_empid;
-
-                $.ajax({
-                    url: url,
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        console.log(response);
-                        // Redirect to the index page or perform any other actions upon success
-                        // window.location.href = "https://localhost:7028/kendoempcomponent/Index";
-                    },
-                    error: function (xhr, status, error) {
-                        console.log(error);
-                    }
-                });
-            });
         });
-    </script>
+    });
+</script>
+
 }
