@@ -1,85 +1,92 @@
 @model tbluser
-
 @{
-    ViewBag.Title = "Register";
-    @* Layout = "~/Views/Shared/_Layout.cshtml"; *@
+    ViewBag.Title = "Login";
+    @* Layout = "~/Views/Shared/_ProductLayout.cshtml"; *@
 }
 
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
 
-<h2>Register</h2>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="~/css/register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+</head>
 
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-   
-    <div class="form-horizontal">
-
-
-        <div class="form-group">
-            <p>Username</p>
-            <div class="col-md-10">
-                <input type="text" class="form-control" id="c_username">
+<body>
+    <div class="login-container">
+        <div class="content">
+            <div class="text">
+                Register Form
             </div>
-        </div>
+            <form id="registerForm">
+                <div class="field">
+                    <input type="text" id="c_username" name="c_username" placeholder="UserName" asp-for="c_username">
+                    <span class="fas fa-user"></span>
+                    <label>UserName</label>
+                </div>
+                <span asp-validation-for="c_username" class="text-danger"></span>
+                <div class="field">
+                    <input type="text" id="c_emailid" name="c_emailid" placeholder="Email Id" asp-for="c_emailid">
+                    <span class="fas fa-envelope"></span>
+                    <label>Email</label>
+                </div>
+                <span asp-validation-for="c_emailid" class="text-danger"></span>
+                <div class="field">
+                    <input type="password" id="c_password" name="c_password" placeholder="Password" asp-for="c_password">
+                    <span class="fas fa-lock"></span>
+                    <label>Password</label>
+                </div>
+                <span asp-validation-for="c_password" class="text-danger"></span>
+                <div class="field">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" >
+                    <span class="fas fa-check-circle"></span>
+                    <label>Confirm Password</label>
+                </div>
+                @* <span asp-validation-for="confirmPassword" class="text-danger"></span> *@
 
-
-        <div class="form-group">
-            <p>Email</p>
-            <div class="col-md-10">
-                <input type="text" class="form-control" id="c_emailid">
-            </div>
-        </div>
-
-
-        <div class="form-group">
-            <p>Password</p>
-            <div class="col-md-10">
-                <input type="password" class="form-control" id="c_password">
-            </div>
-        </div>
-
-        @* <div class="form-group">
-            <p> User Role</p>
-            <div class="col-md-10">
-                <input type="text" class="form-control" id="c_userrole">
-            </div>
-        </div> *@
-
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Register" class="btn btn-primary" id="btnRegister" onclick="Register()" />
+                <button type="button" onclick="Register()">Sign Up</button>
+            </form>
+            <div class="sign-up">
+                Already have an account?
+                <a asp-controller="UserApi" asp-action="Login">Sign in now</a>
             </div>
         </div>
     </div>
 
+    
 
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
+    <script>
+        function Register() {
+            var user = {
+                c_username: $("#c_username").val(),
+                c_emailid: $("#c_emailid").val(),
+                c_password: $("#c_password").val(),
+                confirmPassword: $("#confirmPassword").val()
+                
+            };
 
-<script>
-    function Register() {
-        var user = {
-            c_username: $("#c_username").val(),
-            c_emailid: $("#c_emailid").val(),
-            c_password: $("#c_password").val(),
-            @* c_userrole: $("#c_userrole").val() *@
+            var settings = {
+                url: "https://localhost:7123/api/UserApi/Register",
+                method: "POST",
+                timeout: 0,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify(user)
+            };
+
+            $.ajax(settings).done(function (response) {
+                console.log(response);
+                alert('Successfully Registered!');
+                window.location = "/MVCUserAPI/Login"; // Update the URL if needed
+            }).fail(function (xhr, textStatus, errorThrown) {
+                console.error(xhr.responseText);
+                alert('Registration failed: ' + xhr.responseText);
+            });
         }
-        var settings = {
-            "url": "https://localhost:7123/api/UserApi/Register",
-            "method": "POST",
-            "timeout": 0,
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "data": JSON.stringify(user)
-        }
-        console.log(user);
-        $.ajax(settings).done(function (response) {
-            console.log(response);
-            alert("Successfully Registered!");
-            window.location = "/MVCUserAPI/Login";
-        }).fail(function (response) {
-            alert(response.responseText);
-            window.location = "/MVCUserAPI/Register"; 
-        });
-    }
-</script>
+    </script>
+</body>
+</html>

@@ -1,12 +1,16 @@
-using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using WEBAPI.Models;
 using WEBAPI.Repositories;
+using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using System.Net.Http.Json;
 
 namespace WEBAPI.Controllers
 {
@@ -65,5 +69,6 @@ namespace WEBAPI.Controllers
             _userrepo.Register(User);
             return Ok();
         }
+
     }
 }

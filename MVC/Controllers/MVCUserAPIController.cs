@@ -4,18 +4,19 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVC.Models;
 using MVC.Repositories;
 using Npgsql;
 
-namespace MVC.Controllers
+namespace MVC.controller
 {
-    [Route("[controller]")]
+    // [Route("[controller]")]
     public class MVCUserAPIController : Controller
     {
-        private readonly ILogger<MVCUserAPIController> _logger;
+         private readonly ILogger<MVCUserAPIController> _logger;
         private readonly NpgsqlConnection _conn;
         private readonly IUserRepository _userRepo;
 
@@ -31,16 +32,35 @@ namespace MVC.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+         [HttpPost]
+        public IActionResult Register([FromForm]tbluser user)
+        {
+            user.c_userrole = "User";
+            _userRepo.Register(user);
+            return View();
+        }
+       [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
         
-        [Route("Login")]
-public IActionResult Login(tbluser user)
-{
+        [HttpPost]
+        public IActionResult Login(tbluser user)
+    {
     if (_userRepo.Login(user))
     {
-        var role = HttpContext.Session.GetString("c_userrole");
+        var role = HttpContext.Session.GetString("role");
         if (role == "Admin")
         {
-            return RedirectToAction("Privacy", "Home");
+            return RedirectToAction("Index", "MVCCrudApi");
         }
         else
         {
@@ -52,6 +72,11 @@ public IActionResult Login(tbluser user)
         return View();
     }
 }
+
+
+
+
+
 
 
 
