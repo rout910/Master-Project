@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using MVC.Repositories;
-using MVC.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MVC.Models;
+using MVC.Repositories;
 
 namespace MVC.Controllers
 {
     public class AjaxUserController : Controller
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private IUserRepository? _userRepositories;
+        private readonly IUserRepository _userRepositories;
 
         public AjaxUserController(IUserRepository userRepositories, IHttpContextAccessor httpContextAccessor)
         {
@@ -30,6 +29,12 @@ namespace MVC.Controllers
 
         [HttpGet]
         public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Register()
         {
             return View();
         }
@@ -55,9 +60,17 @@ namespace MVC.Controllers
         [HttpPost]
         public IActionResult Register([FromBody] tbluser user)
         {
-            user.c_userrole = "User";
-            _userRepositories.Register(user);
-            return Json(new { message = "Registration successful" });
+            try
+            {
+                user.c_userrole = "User";
+                _userRepositories.Register(user);
+                return Json(new { success = true, redirectUrl = Url.Action("Login", "AjaxUser") });
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = ex.Message; // Set the error message in ViewBag
+                return View(); // Return the view with the error message
+            }
         }
 
         [HttpGet]
@@ -65,11 +78,5 @@ namespace MVC.Controllers
         {
             return View("Error!");
         }
-    }
-
-    internal interface IUserRepositories
-    {
-        void Login(tbluser user);
-        void Register(tbluser user);
     }
 }

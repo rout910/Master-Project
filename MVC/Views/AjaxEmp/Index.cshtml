@@ -6,6 +6,7 @@
     <title>Employee List</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> <!-- SweetAlert CDN -->
 </head>
 <body>
     <div class="container">
@@ -45,11 +46,11 @@
                 </tbody>
             </table>
         </div>
-        <button class="btn btn-success mt-3 mb-5" onclick="showInsertForm()">Add Employee</button>
+        <button class="btn btn-success mt-3 mb-5" onclick="showAddForm()">Add Employee</button>
 
-        <div id="insertForm" style="display:none;">
+        <div id="addForm" style="display:none;">
             <h2 class="mt-4">Add Employee</h2>
-            <form id="addForm" method="post" enctype="multipart/form-data">
+            <form id="insertForm" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <input type="text" class="form-control" id="name" name="c_empname" placeholder="Name">
                 </div>
@@ -79,17 +80,54 @@
                 <div class="form-group">
                     Image: <input type="file" class="form-control-file" id="c_empimage" name="c_empimage" accept="image/*">
                 </div>
-                 <div class="form-group">
-            Image Preview: <br>
-            <img id="imagepreview" src="c_empimage" style="max-width: 150px; max-height: 150px" class="img-thumbnail rounded" alt="Employee Image" >
-        </div>
-                <button type="button" class="btn btn-primary" onclick="InsertOrUpdateEmployee()">Submit</button>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" onclick="insertEmployee()">Add Employee</button>
+                </div>
             </form>
         </div>
 
-       
+        <div id="updateForm" style="display:none;">
+            <h2 class="mt-4">Update Employee</h2>
+            <form id="editForm" method="post" enctype="multipart/form-data">
+                <input type="hidden" id="editId" name="c_empid">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="editName" name="c_empname" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    Gender:
+                    <input type="radio" id="editMale" name="c_gender" value="Male">
+                    <label for="editMale">Male</label>
+                    <input type="radio" id="editFemale" name="c_gender" value="Female">
+                    <label for="editFemale">Female</label>
+                </div>
+                <div class="form-group">
+                    DOB: <input type="date" class="form-control" id="editDob" name="c_dob">
+                </div>
+                <div class="form-group">
+                    Shift:
+                    <input type="checkbox" id="editMorning" name="c_shift" value="Morning">
+                    <label for="editMorning">Morning</label>
+                    <input type="checkbox" id="editNight" name="c_shift" value="Night">
+                    <label for="editNight">Night</label>
+                </div>
+                <div class="form-group">
+                    Department:
+                    <select class="form-control" id="editDepartment" name="c_depid">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    Image: <input type="file" class="form-control-file" id="editEmpImage" name="c_empimage" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" onclick="updateEmployee()">Update Employee</button>
+                </div>
+            </form>
+        </div>
+   </div>
 
-   <script>
+
+<script>
     // Function to populate department dropdown
     $(document).ready(function(){
         $.ajax({
@@ -98,42 +136,95 @@
             success: function (departments) {
                 departments.forEach(function(department) {
                     $('#department').append('<option value="' + department.c_depid + '">' + department.c_dename + '</option>');
+                    $('#editDepartment').append('<option value="' + department.c_depid + '">' + department.c_dename + '</option>');
                 });
             }
         });
     });
 
-    function showInsertForm() {
-        $('#insertForm').show();
+    function showAddForm() {
+        $('#addForm').show();
         $('#updateForm').hide();
     }
 
-    function InsertOrUpdateEmployee() {
+    function showUpdateForm() {
+        $('#updateForm').show();
+        $('#addForm').hide();
+    }
+
+    function insertEmployee() {
         var shift = [];
         $("input[name='c_shift']:checked").each(function(){
             shift.push($(this).val());
         });
 
-        var data = new FormData($('#addForm')[0]);
-         var url = '/AjaxEmp/Insert'; // Default URL for insert operation
-
-        // Check if there's a value for c_empid (which indicates an update operation)
-        if ($('#insertForm #c_empid').val()) {
-            url = '/AjaxEmp/Update'; // Change URL to update operation
-        }
+        var data = new FormData($('#insertForm')[0]);
 
         $.ajax({
-            url: url,
+            url: '/AjaxEmp/Insert',
             type: 'POST',
             processData: false,
             contentType: false,
             data: data,
             success: function (response) {
-                alert(response.message);
-                location.reload();
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Employee inserted successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
             },
             error: function(xhr, status, error) {
-                alert('Error: ' + xhr.responseText);
+                Swal.fire({
+                    title: 'Error!',
+                    text: xhr.responseText || error,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    }
+
+    function updateEmployee() {
+        var shift = [];
+        $("input[name='c_shift']:checked").each(function(){
+            shift.push($(this).val());
+        });
+
+        var gender = $("input[name='c_gender']:checked").val();
+        var dob = $('#editDob').val();
+
+        var data = new FormData($('#editForm')[0]);
+        data.append("c_gender", gender);
+        data.append("c_dob", dob);
+
+        var empId = $('#editId').val();
+
+        $.ajax({
+            url: '/AjaxEmp/Update/' + empId,
+            type: 'PUT',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (response) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Employee details updated successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: xhr.responseText || error,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     }
@@ -143,57 +234,68 @@
             url: '/AjaxEmp/GetDetails?id=' + id,
             type: 'GET',
             success: function (employee) {
-                // Populate Add Employee form with employee details
-                $('#insertForm #name').val(employee.c_empname);
+                // Populate Update Employee form with employee details
+                $('#editId').val(employee.c_empid);
+                $('#editName').val(employee.c_empname);
                 // Set gender
                 if (employee.c_gender === 'Male') {
-                    $('#insertForm #male').prop('checked', true);
+                    $('#editMale').prop('checked', true);
                 } else {
-                    $('#insertForm #female').prop('checked', true);
+                    $('#editFemale').prop('checked', true);
                 }
-                 $('#insertForm #dob').val(employee.c_dob.split('T')[0]); 
+                $('#editDob').val(employee.c_dob.split('T')[0]);
 
                 // Set shift
                 if (employee.c_shift.includes('Morning')) {
-                    $('#insertForm #morning').prop('checked', true);
+                    $('#editMorning').prop('checked', true);
                 }
                 if (employee.c_shift.includes('Night')) {
-                    $('#insertForm #night').prop('checked', true);
+                    $('#editNight').prop('checked', true);
                 }
-                $('#insertForm #department').val(employee.c_depid);
+                $('#editDepartment').val(employee.c_depid);
                 
-             if (employee.c_empimage) {
-    // Set the image preview
-    $('#imagepreview').attr('src', '/images/' + employee.c_empimage);
-}
-
-
+                if (employee.c_empimage) {
+                    // Set the image preview
+                    $('#editEmpImage').attr('src', '/images/' + employee.c_empimage);
+                }
                 
-                $('#insertForm').show();
-                $('#addForm button').text('Update'); 
+                showUpdateForm();
             },
             error: function (xhr, status, error) {
-                alert('Error fetching employee details: ' + xhr.responseText);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Error fetching employee details: ' + xhr.responseText,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     }
-
-    
-
-   
 
     function deleteEmployee(id) {
         $.ajax({
             url: '/AjaxEmp/DeleteConfirmed?id=' + id,
             type: 'POST',
             success: function (response) {
-                alert(response.message);
-                location.reload();
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: xhr.responseText || error,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     }
 </script>
-
-
-   </body>
+</body>
 </html>
