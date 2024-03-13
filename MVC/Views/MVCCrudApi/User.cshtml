@@ -21,7 +21,7 @@ if (!int.TryParse(Context.Request.Query["page"], out currentPage) || currentPage
         <span>Not logged in</span>
     }
 
-    <a asp-controller="User" asp-action="Login" class="btn btn-link">Logout</a>
+    <a asp-controller="MVCUserAPI" asp-action="Login" class="btn btn-link">Logout</a>
 </div>
 
 <h2>Employee Details</h2>
@@ -32,7 +32,8 @@ if (!int.TryParse(Context.Request.Query["page"], out currentPage) || currentPage
 
 
 <div class="table-responsive">
-    <table class="table table-bordered table-striped">
+    
+    <table class="table table-bordered">
         <thead class="thead-dark">
             <tr>
                 <th>Employee Id</th>
@@ -55,7 +56,7 @@ if (!int.TryParse(Context.Request.Query["page"], out currentPage) || currentPage
                     <td>@employee.c_shift</td>
                     <td>@employee.c_depid</td>
                                    <td>
-    <img src="~/images/@employee.c_empimage" alt="Employee Image" style="max-width: 100px; max-height: 100px;" />
+    <img src="~/images/@employee.c_empimage" alt="Employee Image" style="max-width: 100px; max-height: 100px;"/>
 </td>
 
                     

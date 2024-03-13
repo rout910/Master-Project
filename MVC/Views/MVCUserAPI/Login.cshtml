@@ -1,127 +1,23 @@
-@* @model LoginRequest
-<!DOCTYPE html>
-<!-- Created By CodingNepal -->
-<html lang="en" dir="ltr">
-
-<head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-</head>
-
-<body>
-    <div class="login-container">
-        <div class="content">
-            <div class="text">
-                Login Form
-            </div>
-
-            <!-- Other HTML code -->
-            <div class="validation-summary-errors">
-                @if (!string.IsNullOrEmpty(ViewData["ErrorMessage"] as string))
-                {
-                <p class="text-danger">@Html.Raw(ViewData["ErrorMessage"])</p>
-                }
-            </div>
-            <!-- Other HTML code -->
-
-            <form id="loginForm" method="post" action="https://localhost:7123/api/UserApi/Login">
-                <div class="field">
-                    <input type="text" asp-for="Email" id="Email" placeholder="Email Id" >
-                    <span class="fas fa-envelope"></span>
-                    <label>Email or Phone</label>
-                </div>
-                <span asp-validation-for="Email" class="text-danger"></span>
-
-                <div class="field">
-                    <input type="Password" id="Password" asp-for="Password" placeholder="Password" >
-                    <span class="fas fa-lock"></span>
-                    <label>Password</label>
-                </div>
-                <span asp-validation-for="Password" class="text-danger"></span>
-
-                <div class="forgot-pass">
-                    <a href="#">Forgot Password?</a>
-                </div>
-                <button type="submit">Sign in</button>
-                <div class="sign-up">
-                    Not a member?
-                    <a asp-controller="MVCUserApi" asp-action="Register">signup now</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-            $('#loginForm').submit(function (event) {
-                event.preventDefault(); // Prevent the form from submitting normally
-
-                // Your AJAX login code here
-                Login();
-            });
-        });
-
-        function Login() {
-            var user = {
-                Email: $('#Email').val(),
-                Password: $('#Password').val()
-            };
-
-            $.ajax({
-                url: $('#loginForm').attr('action'),
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(user),
-                success: function (response) {
-                    console.log("in login  username" + response.username);
-                    console.log("in login userid" + response.userid);
-                    sessionStorage.setItem('username', response.username);
-                    sessionStorage.setItem('userid', response.userid);
-
-                    alert('Successfully Logged In!');
-                    if (response.username === "admin") {
-                        window.location = '/MVCCrudApi/Index';
-                    } else {
-                        window.location = '/Home/Index';
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error('Login failed:', error);
-                    alert('Login failed. Please try again.');
-                }
-            });
-        }
-    </script>
-</body>
-
-</html> *@
-
 @{
     ViewData["Title"] = "Login";
 }
 
 <h1>Login</h1>
 
-<form id="loginForm" method="post"> <!-- Ensure method is set to "post" -->
+<form id="loginForm" method="post" style="max-width: 400px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+    <!-- Ensure method is set to "post" -->
     <div class="form-group">
         <label for="Email">Email:</label>
-        <input type="" class="form-control" id="c_emailid" name="c_emailid">
+        <input type="text" class="form-control" id="c_emailid" name="c_emailid" style="border-radius: 20px; border: 1px solid #ccc; padding: 10px;">
     </div>
     <div class="form-group">
         <label for="password">Password:</label>
-        <input type="password" class="form-control" id="c_password" name="c_password">
+        <input type="password" class="form-control" id="c_password" name="c_password" style="border-radius: 20px; border: 1px solid #ccc; padding: 10px;">
     </div>
-    <button type="submit" class="btn btn-primary">Login</button>
+    <button type="submit" class="btn btn-primary" style="border-radius: 20px; padding: 10px 20px; background-color: #007bff; border-color: #007bff; color: #fff;">Login</button>
 </form>
-
 @section Scripts {
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-
-    <!-- SweetAlert JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    
     <script>
         $(document).ready(function () {
             $('#loginForm').submit(function (e) {
@@ -130,27 +26,9 @@
                     url: 'https://localhost:7123/api/UserApi/Login',
                     type: 'POST',
                     data: $(this).serialize(),
-                    success: function (response) {
-                        if (response.success) {
-                            swal("Success!", "Logged in successfully!", "success").then(() => {
-                                var role = response.role;
-                                if (role === "Admin") {
-                                    window.location.href = '/MVCCrudApi/Index';
-                                } else {
-                                    window.location.href = '/Home/Index';
-                                }
-                            });
-                        } else {
-                            swal("Error!", "Invalid email or password!", "error");
-                        }
-                    },
-                    error: function () {
-                        swal("Error!", "An error occurred while logging in!", "error");
-                    }
+                    
                 });
             });
         });
     </script>
 }
-
-

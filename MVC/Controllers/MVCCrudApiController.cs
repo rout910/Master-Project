@@ -37,7 +37,7 @@ namespace MVC.Controllers
             return Json(cities);
         }
 
- [HttpGet]
+         [HttpGet]
         public IActionResult User()
         {
             var user = HttpContext.Session.GetString("username");
@@ -54,7 +54,30 @@ namespace MVC.Controllers
         //         List<tblemp> employees = _repo.GetEmployeeFromUserName(user);
         //         return View(employees);
         // }
+        [HttpGet]
+        public IActionResult GetDetails(int id)
+        {
+            
+            try
+            {
+                // Fetch employee details by id from the database
+                var employee =  _repo.GetOne(id);// Implement this method to fetch employee by id
 
+                if (employee != null)
+                {
+                    // Return JSON response with employee details
+                    return Json(employee);
+                }
+                else
+                {
+                    return Json(new { error = "Employee not found" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "Error fetching employee details: " + ex.Message });
+            }
+        }
 
         [HttpPost]
         public IActionResult add(tblemp emp,IFormFile c_profiles)

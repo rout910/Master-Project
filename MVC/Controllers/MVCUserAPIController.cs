@@ -54,7 +54,7 @@ namespace MVC.controller
         }
 
         
- [HttpPost]
+[HttpPost]
 public IActionResult Login(tbluser user)
 {
     Console.WriteLine("USERNAME::::" + user.c_username);
@@ -71,10 +71,12 @@ public IActionResult Login(tbluser user)
         var role = HttpContext.Session.GetString("role");
         if (role == "Admin")
         {
+            
             return RedirectToAction("Index", "MVCCrudApi");
         }
         else
         {
+            
             return RedirectToAction("User", "MVCCrudApi");
         }
     }
@@ -83,6 +85,7 @@ public IActionResult Login(tbluser user)
         return View();
     }
 }
+
 
 
 
