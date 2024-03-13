@@ -54,7 +54,7 @@ namespace MVC.controller
         }
 
         
-       [HttpPost]
+ [HttpPost]
 public IActionResult Login(tbluser user)
 {
     Console.WriteLine("USERNAME::::" + user.c_username);
@@ -62,8 +62,11 @@ public IActionResult Login(tbluser user)
 
     if (_userRepo.Login(user))
     {
-        string username = user.c_emailid;
-        HttpContext.Session.SetString("username", username);
+        if (user.c_username != null) // Check if username is not null
+        {
+            string username = user.c_username;
+            HttpContext.Session.SetString("username", username);
+        }
 
         var role = HttpContext.Session.GetString("role");
         if (role == "Admin")
