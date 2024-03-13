@@ -36,6 +36,26 @@ namespace MVC.Controllers
             var cities = _repo.GetAll();
             return Json(cities);
         }
+
+ [HttpGet]
+        public IActionResult User()
+        {
+            var user = HttpContext.Session.GetString("username");
+            Console.WriteLine("USER    : : : : : : ::::    " + user);
+            List<tblemp> employees = _repo.GetEmployeeFromUserName(user);
+            return View(employees);
+        }
+
+       //   [HttpGet]
+        // public IActionResult User()
+        // {
+        //       var user = HttpContext.Session.GetString("username");
+        //         Console.WriteLine("USER    : : : : : : ::::    " + user);
+        //         List<tblemp> employees = _repo.GetEmployeeFromUserName(user);
+        //         return View(employees);
+        // }
+
+
         [HttpPost]
         public IActionResult add(tblemp emp,IFormFile c_profiles)
         {

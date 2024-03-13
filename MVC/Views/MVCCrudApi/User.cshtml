@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+@* <!DOCTYPE html>
 <html>
 
 <head>
@@ -151,7 +151,7 @@
         // Function to populate department dropdown
         function LoadEmployee() {
             var settings = {
-                url: "https://localhost:7123/api/CrudApi/GetAll",
+                url: "https://localhost:7123/api/CrudApi/username" +username ,
                 method: "GET",
                 headers: { "Authorization": 'Bearer ' + localStorage.getItem('token') }
             };
@@ -314,4 +314,203 @@
 
 </body>
 
+</html> *@
+@model IEnumerable<MVC.Models.tblemp>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee List</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2 class="mt-5 mb-4">Employee List</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>DOB</th>
+                        <th>Shift</th>
+                        <th>Department ID</th>
+                        <th>Image</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var emp in Model)
+                    {
+                        <tr>
+                            <td>@emp.c_empid</td>
+                            <td>@emp.c_empname</td>
+                            <td>@emp.c_gender</td>
+                            <td>@emp.c_dob.ToString("yyyy-MM-dd")</td>
+                            <td>@emp.c_shift</td>
+                            <td>@emp.c_depid</td>
+                            <td><img id="imagePreview" name="imagePreview" src="/images/@emp.c_empimage" alt="Employee Image" width="100" /></td>
+
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="getDetails('@emp.c_empid')">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteEmployee('@emp.c_empid')">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <button class="btn btn-success mt-3 mb-5" onclick="showInsertForm()">Add Employee</button>
+
+        <div id="insertForm" style="display:none;">
+            <h2 class="mt-4">Add Employee</h2>
+            <form id="addForm" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="name" name="c_empname" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    Gender:
+                    <input type="radio" id="male" name="c_gender" value="Male">
+                    <label for="male">Male</label>
+                    <input type="radio" id="female" name="c_gender" value="Female">
+                    <label for="female">Female</label>
+                </div>
+                <div class="form-group">
+                    DOB: <input type="date" class="form-control" id="dob" name="c_dob">
+                </div>
+                <div class="form-group">
+                    Shift:
+                    <input type="checkbox" id="morning" name="c_shift" value="Morning">
+                    <label for="morning">Morning</label>
+                    <input type="checkbox" id="night" name="c_shift" value="Night">
+                    <label for="night">Night</label>
+                </div>
+                <div class="form-group">
+                    Department:
+                    <select class="form-control" id="department" name="c_depid">
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    Image: <input type="file" class="form-control-file" id="c_empimage" name="c_empimage" accept="image/*">
+                </div>
+                 <div class="form-group">
+            Image Preview: <br>
+            <img id="imagepreview" src="c_empimage" style="max-width: 150px; max-height: 150px" class="img-thumbnail rounded" alt="Employee Image" >
+        </div>
+                <button type="button" class="btn btn-primary" onclick="InsertOrUpdateEmployee()">Submit</button>
+            </form>
+        </div>
+
+       
+
+   <script>
+    // Function to populate department dropdown
+    $(document).ready(function(){
+        $.ajax({
+            url: '/AjaxEmp/GetAllDept',
+            type: 'GET',
+            success: function (departments) {
+                departments.forEach(function(department) {
+                    $('#department').append('<option value="' + department.c_depid + '">' + department.c_dename + '</option>');
+                });
+            }
+        });
+    });
+
+    function showInsertForm() {
+        $('#insertForm').show();
+        $('#updateForm').hide();
+    }
+
+    function InsertOrUpdateEmployee() {
+        var shift = [];
+        $("input[name='c_shift']:checked").each(function(){
+            shift.push($(this).val());
+        });
+
+        var data = new FormData($('#addForm')[0]);
+         var url = '/AjaxEmp/Insert'; // Default URL for insert operation
+
+        // Check if there's a value for c_empid (which indicates an update operation)
+        if ($('#insertForm #c_empid').val()) {
+            url = '/AjaxEmp/Update'; // Change URL to update operation
+        }
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (response) {
+                alert(response.message);
+                location.reload();
+            },
+            error: function(xhr, status, error) {
+                alert('Error: ' + xhr.responseText);
+            }
+        });
+    }
+
+    function getDetails(id) {
+        $.ajax({
+            url: '/AjaxEmp/GetDetails?id=' + id,
+            type: 'GET',
+            success: function (employee) {
+                // Populate Add Employee form with employee details
+                $('#insertForm #name').val(employee.c_empname);
+                // Set gender
+                if (employee.c_gender === 'Male') {
+                    $('#insertForm #male').prop('checked', true);
+                } else {
+                    $('#insertForm #female').prop('checked', true);
+                }
+                 $('#insertForm #dob').val(employee.c_dob.split('T')[0]); 
+
+                // Set shift
+                if (employee.c_shift.includes('Morning')) {
+                    $('#insertForm #morning').prop('checked', true);
+                }
+                if (employee.c_shift.includes('Night')) {
+                    $('#insertForm #night').prop('checked', true);
+                }
+                $('#insertForm #department').val(employee.c_depid);
+                
+             if (employee.c_empimage) {
+    // Set the image preview
+    $('#imagepreview').attr('src', '/images/' + employee.c_empimage);
+}
+
+
+                
+                $('#insertForm').show();
+                $('#addForm button').text('Update'); 
+            },
+            error: function (xhr, status, error) {
+                alert('Error fetching employee details: ' + xhr.responseText);
+            }
+        });
+    }
+
+    
+
+   
+
+    function deleteEmployee(id) {
+        $.ajax({
+            url: '/AjaxEmp/DeleteConfirmed?id=' + id,
+            type: 'POST',
+            success: function (response) {
+                alert(response.message);
+                location.reload();
+            }
+        });
+    }
+</script>
+
+
+   </body>
 </html>

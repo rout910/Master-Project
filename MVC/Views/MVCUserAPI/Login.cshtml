@@ -107,17 +107,21 @@
 <form id="loginForm" method="post"> <!-- Ensure method is set to "post" -->
     <div class="form-group">
         <label for="Email">Email:</label>
-        <input type="email" class="form-control" id="email" name="c_emailid">
+        <input type="" class="form-control" id="c_emailid" name="c_emailid">
     </div>
     <div class="form-group">
         <label for="password">Password:</label>
-        <input type="password" class="form-control" id="password" name="c_password">
+        <input type="password" class="form-control" id="c_password" name="c_password">
     </div>
     <button type="submit" class="btn btn-primary">Login</button>
 </form>
 
 @section Scripts {
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script>
         $(document).ready(function () {
             $('#loginForm').submit(function (e) {

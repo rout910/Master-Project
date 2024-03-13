@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVC.Models;
+using Microsoft.AspNetCore.Http;
+
 using MVC.Repositories;
 using Npgsql;
 
@@ -52,11 +54,17 @@ namespace MVC.controller
         }
 
         
-        [HttpPost]
-        public IActionResult Login(tbluser user)
-    {
+       [HttpPost]
+public IActionResult Login(tbluser user)
+{
+    Console.WriteLine("USERNAME::::" + user.c_username);
+    Console.WriteLine("PASSWORD::::" + user.c_password);
+
     if (_userRepo.Login(user))
     {
+        string username = user.c_emailid;
+        HttpContext.Session.SetString("username", username);
+
         var role = HttpContext.Session.GetString("role");
         if (role == "Admin")
         {
@@ -64,7 +72,7 @@ namespace MVC.controller
         }
         else
         {
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("User", "MVCCrudApi");
         }
     }
     else
@@ -72,6 +80,7 @@ namespace MVC.controller
         return View();
     }
 }
+
 
 
 
