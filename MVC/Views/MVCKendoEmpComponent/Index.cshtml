@@ -1,312 +1,4 @@
-@* @model IEnumerable<MVC.Models.tblemp>
-
-@{
-    ViewData["Title"] = "Employee Management";
-    Layout = null;
-}
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Employee Management</title>
-    <link href="https://kendo.cdn.telerik.com/2022.1.301/styles/kendo.default-v2.min.css" rel="stylesheet" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        h2 {
-            color: #333;
-            text-align: center;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            font-weight: bold;
-        }
-        input[type="text"], input[type="file"] {
-            width: calc(100% - 10px);
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            float: right;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .editBtn, .deleteBtn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .editBtn:hover, .deleteBtn:hover {
-            background-color: #0056b3;
-        }
-    </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2022.1.301/js/kendo.all.min.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h2>Employee Management</h2>
-        <div class="form-group">
-            <h3>Create New Employee</h3>
-            <div>
-                <label for="empName">Employee Name:</label>
-                <input id="empName" type="text" />
-            </div>
-            <div>
-                <label>Gender:</label>
-                <input type="radio" id="male" name="gender" value="male">
-                <label for="male">Male</label>
-                <input type="radio" id="female" name="gender" value="female">
-                <label for="female">Female</label>
-            </div>
-            <div>
-                <label for="dob">Date of Birth:</label>
-                <input id="dob" type="text" />
-            </div>
-            <div>
-                <label>Shift:</label>
-                <input type="checkbox" id="morningShift" value="morning">
-                <label for="morningShift">Morning</label>
-                <input type="checkbox" id="nightShift" value="night">
-                <label for="nightShift">Night</label>
-            </div>
-            <div>
-                <label for="deptId">Department ID:</label>
-                <input id="deptId" type="text" />
-            </div>
-            <div>
-                <label for="image">Image:</label>
-                <input id="image" type="file" />
-            </div>
-            <button id="createBtn">Create</button>
-        </div>
-
-        <hr />
-
-        <div>
-            <h3>Employee List</h3>
-            <ul id="employeeList">
-                @foreach (var emp in Model)
-                {
-                    <li data-id="@emp.c_empid">
-                        @emp.c_empname - @emp.c_gender - @emp.c_dob.ToShortDateString() - @emp.c_shift - @emp.c_depid
-                        <button class="editBtn">Edit</button>
-                        <button class="deleteBtn">Delete</button>
-                    </li>
-                }
-            </ul>
-        </div>
-    </div>
-
-    <script>
-        $(document).ready(function () {
-            // Initialize Kendo DatePicker for Date of Birth
-            $("#dob").kendoDatePicker({
-                format: "yyyy-MM-dd"
-            });
-
-            // Create
-            $("#createBtn").click(function () {
-                var emp = {
-                    c_empname: $("#empName").val(),
-                    c_gender: $("input[name='gender']:checked").val(),
-                    c_dob: $("#dob").val(),
-                    c_shift: ($("#morningShift").is(":checked") ? "Morning " : "") + ($("#nightShift").is(":checked") ? "Night" : ""),
-                    c_depid: $("#deptId").val(),
-                    c_empimage: $("#image").val() // This may not work as expected due to security reasons
-                };
-
-                $.ajax({
-                    url: "https://localhost:7123/api/KendoEmpComponentApi/Create",
-                    type: "POST",
-                    dataType: "json",
-                    contentType: "application/json",
-                    data: JSON.stringify(emp),
-                    success: function (data) {
-                        // Handle success
-                        console.log("Employee created successfully");
-                        // You may want to refresh the employee list after creation
-                    },
-                    error: function (xhr, status, error) {
-                        // Handle error
-                        console.error("Error creating employee:", error);
-                    }
-                });
-            });
-
-            // Update
-            $("#employeeList").on("click", ".editBtn", function () {
-                var empId = $(this).closest("li").data("id");
-                var emp = {
-                    c_empid: empId,
-                    c_empname: $(this).closest("li").find(".empName").val(),
-                    c_gender: $(this).closest("li").find(".gender").val(),
-                    c_dob: $(this).closest("li").find(".dob").val(),
-                    c_shift: $(this).closest("li").find(".shift").val(),
-                    c_depid: $(this).closest("li").find(".deptId").val(),
-                    c_empimage: $(this).closest("li").find(".image").val() // This may not work as expected due to security reasons
-                };
-
-                $.ajax({
-                    url: "https://localhost:7123/api/KendoEmpComponentApi/update/" + empId,
-                    type: "POST",
-                    dataType: "json",
-                    contentType: "application/json",
-                    data: JSON.stringify(emp),
-                    success: function (data) {
-                        // Handle success
-                        console.log("Employee updated successfully");
-                        // You may want to refresh the employee list after update
-                    },
-                    error: function (xhr, status, error) {
-                        // Handle error
-                        console.error("Error updating employee:", error);
-                    }
-                });
-            });
-
-            // Delete
-            $("#employeeList").on("click", ".deleteBtn", function () {
-                var empId = $(this).closest("li").data("id");
-
-                $.ajax({
-                    url: "https://localhost:7123/api/KendoEmpComponentApi/Delete/" + empId,
-                    type: "POST",
-                    dataType: "json",
-                    success: function (data) {
-                        // Handle success
-                        console.log("Employee deleted successfully");
-                        // You may want to refresh the employee list after delete
-                    },
-                    error: function (xhr, status, error) {
-                        // Handle error
-                        console.error("Error deleting employee:", error);
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html> *@
-
-@* @model IEnumerable<MVC.Models.tblemp>
-
-@{
-    ViewData["Title"] = "Employee Management";
-    Layout = null;
-}
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Employee Management</title>
-    <link href="https://kendo.cdn.telerik.com/2022.1.301/styles/kendo.default-v2.min.css" rel="stylesheet" />
-    <style>
-        /* Your CSS styles here */
-    </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2022.1.301/js/kendo.all.min.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h2>Employee Management</h2>
-        <!-- Display employee list in a table -->
-        <div>
-            <h3>Employee List</h3>
-            <table id="employeeTable">
-                <thead>
-                    <tr>
-                        <th>Employee Name</th>
-                        <th>Gender</th>
-                        <th>Date of Birth</th>
-                        <th>Shift</th>
-                        <th>Department ID</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var emp in Model)
-                    {
-                        <tr data-id="@emp.c_empid">
-                            <td>@emp.c_empname</td>
-                            <td>@emp.c_gender</td>
-                            <td>@emp.c_dob.ToShortDateString()</td>
-                            <td>@emp.c_shift</td>
-                            <td>@emp.c_depid</td>
-                            <td><button class="deleteBtn">Delete</button></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script>
-        $(document).ready(function () {
-            // Delete employee
-            $("#employeeTable").on("click", ".deleteBtn", function () {
-                var empId = $(this).closest("tr").data("id");
-
-                $.ajax({
-                    url: "https://localhost:7123/api/KendoEmpComponentApi/Delete/" + empId,
-                    type: "POST",
-                    dataType: "json",
-                    success: function (data) {
-                        // Handle success
-                        console.log("Employee deleted successfully");
-                        // You may want to refresh the employee list after delete
-                    },
-                    error: function (xhr, status, error) {
-                        // Handle error
-                        console.error("Error deleting employee:", error);
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html>
- *@
- @model IEnumerable<MVC.Models.tblemp>
+@model IEnumerable<MVC.Models.tblemp>
 
 @{
     ViewData["Title"] = "Employee Management";
@@ -331,31 +23,31 @@
         
         <!-- Insert and update form -->
         <div class="form-group">
-    <h3>Create/Update Employee</h3>
-    <div>
-        <label for="empName">Employee Name:</label>
-        <input id="empName" type="text" /><br>
-        <label>Gender:</label>
-        <input type="radio" id="male" name="gender" value="male">
-        <label for="male">Male</label>
-        <input type="radio" id="female" name="gender" value="female">
-        <label for="female">Female</label><br>
-        <label for="dob">Date of Birth:</label>
-        <input id="dob" type="text" /><br>
-        <label for="deptId">Department ID:</label>
-        <input id="deptId" style="width: 100%;" />
-        <!-- Dropdown for Department ID -->
-        <br>
-        <label>Shift:</label><br>
-        <input id="dayShift" type="checkbox" name="shift" value="day">
-        <label for="dayShift">Day Shift</label><br>
-        <input id="nightShift" type="checkbox" name="shift" value="night">
-        <label for="nightShift">Night Shift</label><br>
-        <label for="image">Image:</label>
-        <input id="image" type="file" />
-    </div>
-    <button id="createBtn">Create/Update</button>
-</div>
+            <h3>Create/Update Employee</h3>
+            <div>
+                <label for="empName">Employee Name:</label>
+                <input id="empName" type="text" /><br>
+                <label>Gender:</label>
+                <input type="radio" id="male" name="gender" value="male">
+                <label for="male">Male</label>
+                <input type="radio" id="female" name="gender" value="female">
+                <label for="female">Female</label><br>
+                <label for="dob">Date of Birth:</label>
+                <input id="dob" type="text" /><br>
+                <label for="deptId">Department ID:</label>
+                <input id="deptId" style="width: 100%;" />
+                <!-- Dropdown for Department ID -->
+                <br>
+                <label>Shift:</label><br>
+                <input id="dayShift" type="checkbox" name="shift" value="day">
+                <label for="dayShift">Day Shift</label><br>
+                <input id="nightShift" type="checkbox" name="shift" value="night">
+                <label for="nightShift">Night Shift</label><br>
+                <label for="image">Image:</label>
+                <input id="image" type="file" />
+            </div>
+            <button id="createBtn">Create/Update</button>
+        </div>
 
         <hr />
 
@@ -393,25 +85,30 @@
     <script>
         $(document).ready(function () {
             // Initialize Kendo DatePicker for Date of Birth
-             $("#dob").kendoDatePicker({
-        format: "yyyy-MM-dd"
-    });
+            $("#dob").kendoDatePicker({
+                format: "yyyy-MM-dd"
+            });
 
-    // Initialize Kendo CheckBoxes for Shift
-    $("#dayShift, #nightShift").kendoCheckBox();
+            // Initialize Kendo CheckBoxes for Shift
+            $("#dayShift, #nightShift").kendoCheckBox();
 
-    // Initialize Kendo DropDownList for Department ID
-    $("#deptId").kendoDropDownList({
-        dataTextField: "deptName", // Field from the Department table
-        dataValueField: "deptId", // Field from the Department table
-        dataSource: {
-            // Your data source for departments from another table
-            // Example:
-            // data: [{ deptId: 1, deptName: "Department 1" }, { deptId: 2, deptName: "Department 2" }]
-        },
-        optionLabel: "Select Department..."
-    });
-            
+            // Initialize Kendo DropDownList for Department ID
+            $("#deptId").kendoDropDownList({
+                dataTextField: "deptName", // Field from the Department table
+                dataValueField: "deptId", // Field from the Department table
+                dataSource: {
+                    // Your data source for departments from another table
+                    // Example:
+                    // data: [{ deptId: 1, deptName: "Department 1" }, { deptId: 2, deptName: "Department 2" }]
+                },
+                optionLabel: "Select Department..."
+            });
+
+            // API URLs
+            var apiUrl = {
+                createOrUpdate: "https://localhost:7123/api/KendoEmpComponentApi/CreateOrUpdate",
+                delete: "https://localhost:7123/api/KendoEmpComponentApi/Delete"
+            };
 
             // Create/Update
             $("#createBtn").click(function () {
@@ -423,25 +120,9 @@
                     image: $("#image").val() // This may not work as expected due to security reasons
                 };
 
-                var url;
-                // Determine whether to create or update based on some condition (e.g., presence of employee ID)
-                // For demonstration purposes, assume it's always an insert
-                // Adjust the condition based on your application's requirements
-                var isInsert = true;
-
-                if (isInsert) {
-                    // Set the URL for insert
-                    url = "https://localhost:7123/api/KendoEmpComponentApi/CreateorUpdate";
-                } else {
-                    // Set the URL for update
-                    url = "https://localhost:7123/api/KendoEmpComponentApi/CreateorUpdate";
-                    // Add employee ID to empData for update
-                    empData.empId = /* Obtain employee ID */;
-                }
-
                 // Send AJAX request
                 $.ajax({
-                    url: url,
+                    url: apiUrl.createOrUpdate,
                     type: "POST",
                     dataType: "json",
                     contentType: "application/json",
@@ -462,8 +143,8 @@
                 var empId = $(this).closest("tr").data("id");
 
                 $.ajax({
-                    url: "https://localhost:7123/api/KendoEmpComponentApi/Delete/" + empId,
-                    type: "POST",
+                    url: apiUrl.delete + "/" + empId,
+                    type: "DELETE",
                     dataType: "json",
                     success: function (data) {
                         // Handle success
@@ -480,4 +161,3 @@
     </script>
 </body>
 </html>
-
