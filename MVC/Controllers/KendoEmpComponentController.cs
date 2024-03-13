@@ -25,6 +25,14 @@ public class KendoEmpComponentController : Controller
         var emp = _empRepo.GetAll();
         return View(emp);
     }
+    [HttpGet]
+        public IActionResult User()
+        {
+                var user = HttpContext.Session.GetString("username");
+                Console.WriteLine("USER    : : : : : : ::::    " + user);
+                List<tblemp> employees = _empRepo.GetEmployeeFromUserName(user);
+                return View(employees);
+        } 
 
 
     public IActionResult GetDeptName()
